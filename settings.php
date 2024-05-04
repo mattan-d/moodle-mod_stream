@@ -25,8 +25,25 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/resourcelib.php');
+require_once(__DIR__ . '/locallib.php');
 
 if ($ADMIN->fulltree) {
+
+    $check = json_decode(streamvideo::call(['connection' => true]));
+    if ($check->status == 'failed') {
+        $notifyclass = 'notifyproblem';
+        $status = 'connectionfailed';
+        $errormessage = $check->description;
+    } else {
+        $status = 'connectionok';
+        $notifyclass = 'notifysuccess';
+        $errormessage = '';
+    }
+
+    $statusmessage = $OUTPUT->notification(get_string('connectionstatus', 'mod_stream') .
+            ': ' . get_string($status, 'mod_stream') . $errormessage, $notifyclass);
+    $connectionstatus = new admin_setting_heading('stream/connectionstatus', $statusmessage, '');
+    $settings->add($connectionstatus);
 
     $settings->add(new admin_setting_heading('stream/connectionsettings',
             get_string('connectionsettings', 'mod_stream'),

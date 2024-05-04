@@ -55,3 +55,6 @@ $string['accountid_desc'] = '';
 $string['search'] = 'Search';
 $string['connectionsettings'] = 'Connection settings';
 $string['connectionsettings_desc'] = 'These settings define how Moodle connects to Stream.';
+$string['connectionok'] = 'Connection working.';
+$string['connectionfailed'] = 'Connection failed: ';
+$string['connectionstatus'] = 'Connection status';

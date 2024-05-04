@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 require_once(__DIR__ . '/crypt/jwt.php');
-require_once(__DIR__ . '/streamvideo.php');
+require_once(__DIR__ . '/../locallib.php');
 
 /**
  * Class for ajax call.

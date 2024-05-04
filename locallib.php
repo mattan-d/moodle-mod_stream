@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of the Zoom plugin for Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,12 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Video class.
+ * Internal library of functions for module stream
+ *
+ * All the zoom specific functions, needed to implement the module
+ * logic, should go here. Never include this file from your lib.php!
  *
  * @package    mod_stream
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class streamvideo.
@@ -82,7 +87,7 @@ class streamvideo {
      *
      * @param array $data
      */
-    private static function call($data = []) {
+    public function call($data = []) {
         global $CFG;
 
         $config = get_config('stream');

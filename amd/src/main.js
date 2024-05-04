@@ -76,7 +76,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             }, 100);
         },
         failed: function(error, self) {
-            self.elements.html('<div class="alert alert-danger">' + error + '</div>');
+            str.get_string('connectionfailed', 'mod_stream').then(function(connectionfailed) {
+                self.elements.html('<div class="alert alert-danger">' + connectionfailed + error.message + '</div>');
+            });
         },
         list: function(response, self) {
             self.selected($('#id_identifier').val(), $('#id_topic').val());
@@ -94,10 +96,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                         self.elements.append(html);
                     });
                 } else {
-                    self.elements.html('<div class="alert alert-info">' + str.get_string('noresults', 'mod_stream') + '</div>');
+                    str.get_string('noresults', 'mod_stream').then(function(noresults) {
+                        self.elements.html('<div class="alert alert-info">' + noresults + '</div>');
+                    });
                 }
-            } else {
-                this.failed(response.error);
             }
         },
     };

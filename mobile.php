@@ -28,7 +28,6 @@ header('Access-Control-Allow-Origin: *');
 
 require_once('../../config.php');
 require_once('locallib.php');
-require_once(__DIR__ . '/classes/streamvideo.php');
 
 global $PAGE, $DB, $CFG, $OUTPUT;
 
