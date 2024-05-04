@@ -27,23 +27,22 @@ defined('MOODLE_INTERNAL') || die();
 $string['modulename'] = 'STREAM';
 $string['modulenameplural'] = 'STREAM';
 $string['modulename_help'] =
-        'STREAM is a plugin that simplifies and adds a lot of security in Moodle transactions with the Video Library';
+        'Stream is a cutting-edge video platform designed for schools, seamlessly integrating with current systems for optimal teaching. This Moodle plugin brings Stream\'s advanced features into your LMS, enriching the learning journey for both teachers and students.';
 $string['stream:addinstance'] = 'Add a new STREAM';
 $string['stream:submit'] = 'Submit STREAM';
 $string['stream:view'] = 'View STREAM';
 $string['stream'] = 'STREAM';
-$string['pluginadministration'] = 'STREAM administration';
+$string['pluginadministration'] = 'Stream administration';
 $string['pluginname'] = 'STREAM';
 $string['privacy:metadata'] =
         'The STREAM if integrated with <a href="https://www.centricstream.co.il">CentricApp</a> will save data for detection of piracy.';
 $string['loadind'] = 'Loading video list...';
 $string['name_title'] = 'Title';
-
 $string['safety_title'] = 'Security';
 $string['safety_desc'] = 'About the Player show?';
 $string['safety_none'] = 'Anything';
 $string['safety_id'] = 'Student ID';
-
+$string['noresults'] = 'No results or videos were found.';
 $string['identifier'] = 'Video identifier';
 $string['identifier_help'] = 'Identifier of the video only in Stream.';
 $string['topic'] = 'Video Topic';

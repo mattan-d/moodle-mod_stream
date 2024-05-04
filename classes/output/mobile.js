@@ -26,8 +26,8 @@
     var streamPrepareResize = false;
     actionHandlers.prepareResize = function(iframe, data, respond) {
         if (streamPrepareResize) {
- return;
-}
+            return;
+        }
         streamPrepareResize = true;
 
         if (iframe.clientHeight !== data.scrollHeight ||
@@ -42,8 +42,8 @@
     actionHandlers.resize = function(iframe, data, respond) {
 
         if (streamLastResize == data.scrollHeight) {
- return;
-}
+            return;
+        }
         streamLastResize = data.scrollHeight;
 
         console.log("resize");
@@ -56,7 +56,7 @@
         }
 
         var iframe,
-iframes = document.getElementsByTagName('iframe');
+            iframes = document.getElementsByTagName('iframe');
         for (var i = 0; i < iframes.length; i++) {
             if (iframes[i].contentWindow === event.source) {
                 iframe = iframes[i];

@@ -94,7 +94,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                         self.elements.append(html);
                     });
                 } else {
-                    self.elements.html('<div class="alert alert-info">No Re!</div>');
+                    self.elements.html('<div class="alert alert-info">' + str.get_string('noresults', 'mod_stream') + '</div>');
                 }
             } else {
                 this.failed(response.error);
