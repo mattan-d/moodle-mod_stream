@@ -25,29 +25,22 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'STREAM';
-$string['modulenameplural'] = 'STREAM';
 $string['modulename_help'] =
         'Stream is a cutting-edge video platform designed for schools, seamlessly integrating with current systems for optimal teaching. This Moodle plugin brings Stream\'s advanced features into your LMS, enriching the learning journey for both teachers and students.';
-$string['stream:addinstance'] = 'Add a new STREAM';
-$string['stream:submit'] = 'Submit STREAM';
-$string['stream:view'] = 'View STREAM';
+$string['modulenameplural'] = 'STREAM';
 $string['stream'] = 'STREAM';
 $string['pluginadministration'] = 'Stream administration';
-$string['pluginname'] = 'STREAM';
+$string['stream:view'] = 'View STREAM';
+$string['stream:addinstance'] = 'Add a new STREAM';
 $string['privacy:metadata'] =
         'The STREAM if integrated with <a href="https://www.centricstream.co.il">CentricApp</a> will save data for detection of piracy.';
 $string['loadind'] = 'Loading video list...';
-$string['name_title'] = 'Title';
-$string['safety_title'] = 'Security';
-$string['safety_desc'] = 'About the Player show?';
-$string['safety_none'] = 'Anything';
-$string['safety_id'] = 'Student ID';
-$string['noresults'] = 'No results or videos were found.';
+$string['safetynone'] = 'Anything';
+$string['safetyid'] = 'Student ID';
 $string['identifier'] = 'Video identifier';
-$string['identifier_help'] = 'Identifier of the video only in Stream.';
-$string['topic'] = 'Video Topic';
 $string['apiidentifier'] = 'Stream API Identifier';
 $string['apiidentifier_desc'] = 'The identifier field to use when making a call to the Stream API';
+$string['topic'] = 'Video Topic';
 $string['apiendpoint'] = 'Stream API Endpoint';
 $string['apiendpoint_desc'] = 'Choose which Stream API endpoint the Stream activity will use to connect.';
 $string['accountid'] = 'Stream account ID';
@@ -58,3 +51,5 @@ $string['connectionsettings_desc'] = 'These settings define how Moodle connects 
 $string['connectionok'] = 'Connection working.';
 $string['connectionfailed'] = 'Connection failed: ';
 $string['connectionstatus'] = 'Connection status';
+$string['noresults'] = 'No results or videos were found.';
+$string['nametitle'] = 'Title';

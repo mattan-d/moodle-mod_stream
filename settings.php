@@ -58,8 +58,8 @@ if ($ADMIN->fulltree) {
             get_string('accountid_desc', 'mod_stream'), ''));
 
     $itemseguranca = [
-            'none' => get_string('safety_none', 'mod_stream'),
-            'id' => get_string('safety_id', 'mod_stream'),
+            'none' => get_string('safetynone', 'mod_stream'),
+            'id' => get_string('safetyid', 'mod_stream'),
     ];
 
     $infofields = $DB->get_records('user_info_field');
