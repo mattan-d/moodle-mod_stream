@@ -76,7 +76,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             }, 100);
         },
         failed: function(error, self) {
-            str.get_string('connectionfailed', 'mod_stream')
+            return str.get_string('connectionfailed', 'mod_stream')
                 .then(function(connectionfailed) {
                     self.elements.html('<div class="alert alert-danger">' + connectionfailed + error.message + '</div>');
                 });
@@ -98,7 +98,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                         self.elements.append(html);
                     });
                 } else {
-                    str.get_string('noresults', 'mod_stream')
+                    return str.get_string('noresults', 'mod_stream')
                         .then(function(noresults) {
                             self.elements.html('<div class="alert alert-info">' + noresults + '</div>');
                         });
