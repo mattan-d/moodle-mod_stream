@@ -24,33 +24,33 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['loadind'] = 'Loading video list...';
 $string['accountid'] = 'Stream account ID';
 $string['accountid_desc'] = '';
-$string['apiidentifier'] = 'Stream API Identifier';
-$string['apiidentifier_desc'] = 'The identifier field to use when making a call to the Stream API';
-$string['modulename'] = 'STREAM';
-$string['modulename_help'] =
-        'Stream is a cutting-edge video platform designed for schools, seamlessly integrating with current systems for optimal teaching. This Moodle plugin brings Stream\'s advanced features into your LMS, enriching the learning journey for both teachers and students.';
-$string['modulenameplural'] = 'STREAM';
-$string['pluginname'] = 'STREAM';
-$string['pluginadministration'] = 'Stream administration';
-$string['privacy:metadata'] =
-        'The STREAM if integrated with <a href="https://www.centricstream.co.il">CentricApp</a> will save data for detection of piracy.';
-$string['safetyid'] = 'Student ID';
 $string['apiendpoint'] = 'Stream API Endpoint';
 $string['apiendpoint_desc'] = 'Choose which Stream API endpoint the Stream activity will use to connect.';
+$string['apiidentifier'] = 'Stream API Identifier';
+$string['apiidentifier_desc'] = 'The identifier field to use when making a call to the Stream API';
 $string['connectionfailed'] = 'Connection failed: ';
 $string['connectionok'] = 'Connection working.';
 $string['connectionsettings'] = 'Connection settings';
 $string['connectionsettings_desc'] = 'These settings define how Moodle connects to Stream.';
 $string['connectionstatus'] = 'Connection status';
 $string['identifier'] = 'Video identifier';
+$string['loadind'] = 'Loading video list...';
+$string['modulename'] = 'STREAM';
+$string['modulename_help'] =
+        'Stream is a cutting-edge video platform designed for schools, seamlessly integrating with current systems for optimal teaching. This Moodle plugin brings Stream\'s advanced features into your LMS, enriching the learning journey for both teachers and students.';
+$string['modulenameplural'] = 'STREAM';
+$string['nametitle'] = 'Title';
+$string['noresults'] = 'No results or videos were found.';
+$string['pluginadministration'] = 'Stream administration';
+$string['pluginname'] = 'STREAM';
+$string['privacy:metadata'] =
+        'The STREAM if integrated with <a href="https://www.centricstream.co.il">CentricApp</a> will save data for detection of piracy.';
+$string['safetyid'] = 'Student ID';
+$string['safetynone'] = 'Anything';
+$string['search'] = 'Search';
 $string['stream'] = 'STREAM';
 $string['stream:addinstance'] = 'Add a new STREAM';
 $string['stream:view'] = 'View STREAM';
-$string['nametitle'] = 'Title';
-$string['noresults'] = 'No results or videos were found.';
-$string['safetynone'] = 'Anything';
-$string['search'] = 'Search';
 $string['topic'] = 'Video Topic';
