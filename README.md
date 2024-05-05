@@ -1,12 +1,10 @@
-# Plugin mod_stream for Moodle
-
-## Details
-
-[![Maintained by Mattan Dor (CentricApp)](https://img.shields.io/badge/Maintained%20by-Mattan%20Dor%20(CentricApp)-brightgreen)](https://centricapp.co.il)
-
 # Stream Moodle Plugin
 
 ![Stream Logo](https://centricstream.co.il/images/logo.svg)
+
+
+[![Maintained by Mattan Dor (CentricApp)](https://img.shields.io/badge/Maintained%20by-Mattan%20Dor%20(CentricApp)-brightgreen)](https://centricapp.co.il)
+
 
 Stream is a revolutionary video platform tailored for academic institutions, offering seamless integration into existing systems and unprecedented pedagogical optimization. This Moodle plugin facilitates the incorporation of Stream's powerful features directly into your learning management system, enhancing the educational experience for both instructors and students.
 

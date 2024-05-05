@@ -103,6 +103,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                         });
                 }
             }
+            return true;
         },
     };
 });
