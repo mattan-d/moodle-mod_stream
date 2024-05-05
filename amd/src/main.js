@@ -58,14 +58,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                 methodname: 'mod_stream_video_list',
                 args: {
                     term: $('#stream-title-search').val()
-                },
-                done: function(response) {
-                    self.list(response, self);
-                },
-                fail: function(error) {
-                    self.failed(error, self);
-                },
-            }]);
+                }
+            }])
+                .then(function(response) {
+                    return self.list(response, self);
+                })
+                .catch(function(error) {
+                    return self.failed(error, self);
+                });
         },
         selected: function(identifier, topic) {
             setTimeout(function() {
@@ -76,9 +76,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             }, 100);
         },
         failed: function(error, self) {
-            str.get_string('connectionfailed', 'mod_stream').then(function(connectionfailed) {
-                self.elements.html('<div class="alert alert-danger">' + connectionfailed + error.message + '</div>');
-            });
+            return str.get_string('connectionfailed', 'mod_stream')
+                .then(function(connectionfailed) {
+                    self.elements.html('<div class="alert alert-danger">' + connectionfailed + error.message + '</div>');
+                });
         },
         list: function(response, self) {
             self.selected($('#id_identifier').val(), $('#id_topic').val());
@@ -96,9 +97,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                         self.elements.append(html);
                     });
                 } else {
-                    str.get_string('noresults', 'mod_stream').then(function(noresults) {
-                        self.elements.html('<div class="alert alert-info">' + noresults + '</div>');
-                    });
+                    return str.get_string('noresults', 'mod_stream')
+                        .then(function(noresults) {
+                            self.elements.html('<div class="alert alert-info">' + noresults + '</div>');
+                        });
                 }
             }
         },

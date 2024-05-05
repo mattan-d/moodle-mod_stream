@@ -10,7 +10,7 @@
 
         iframe.style.width = '100%';
 
-        var resize = function(event) {
+        var resize = function() {
             if (iframe.contentWindow) {
                 respond('resize');
             } else {
@@ -39,14 +39,13 @@
     };
 
     var streamLastResize = -1;
-    actionHandlers.resize = function(iframe, data, respond) {
+    actionHandlers.resize = function(iframe, data) {
 
         if (streamLastResize == data.scrollHeight) {
             return;
         }
         streamLastResize = data.scrollHeight;
 
-        console.log("resize");
         iframe.style.height = data.scrollHeight + 'px';
     };
 
