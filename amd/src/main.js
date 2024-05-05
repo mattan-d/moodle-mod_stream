@@ -76,10 +76,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             }, 100);
         },
         failed: function(error, self) {
-            return str.get_string('connectionfailed', 'mod_stream')
+            str.get_string('connectionfailed', 'mod_stream')
                 .then(function(connectionfailed) {
                     self.elements.html('<div class="alert alert-danger">' + connectionfailed + error.message + '</div>');
                 });
+            return true;
         },
         list: function(response, self) {
             self.selected($('#id_identifier').val(), $('#id_topic').val());
@@ -97,12 +98,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                         self.elements.append(html);
                     });
                 } else {
-                    return str.get_string('noresults', 'mod_stream')
+                    str.get_string('noresults', 'mod_stream')
                         .then(function(noresults) {
                             self.elements.html('<div class="alert alert-info">' + noresults + '</div>');
                         });
+                    return false;
                 }
             }
+            return true;
         },
     };
 });
