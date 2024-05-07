@@ -59,7 +59,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                 args: {
                     term: $('#stream-title-search').val()
                 }
-            }])
+            }])[0]
                 .then(function(response) {
                     return self.list(response, self);
                 })
