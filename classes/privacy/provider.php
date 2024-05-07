@@ -30,14 +30,23 @@ namespace mod_stream\privacy;
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\null_provider {
+class provider implements \core_privacy\local\metadata\provider {
 
     /**
-     * Get reason.
+     * Returns metadata.
      *
-     * @return string
+     * @param collection $collection The initialised collection to add items to.
+     * @return collection A listing of user data stored through this system.
      */
-    public static function get_reason() {
-        return 'privacy:metadata';
+    public static function get_metadata(collection $collection): collection {
+
+        // Personal information has to be passed to Stream.
+        // This includes the user ID and fullname.
+        $collection->add_external_location_link('stream', [
+                'email' => 'privacy:metadata:stream:email',
+                'fullname' => 'privacy:metadata:stream:fullname',
+        ], 'privacy:metadata:stream');
+
+        return $collection;
     }
 }

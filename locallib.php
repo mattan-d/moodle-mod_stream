@@ -69,7 +69,7 @@ class streamvideo {
         $payload = [
                 'identifier' => $identifier,
                 'matricula' => $cmid,
-                'name' => fullname($USER),
+                'fullname' => fullname($USER),
                 'email' => $USER->email,
                 'safetyplayer' => $safetyplayer,
         ];
