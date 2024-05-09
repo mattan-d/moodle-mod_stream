@@ -41,7 +41,7 @@ class backup_stream_activity_structure_step extends backup_activity_structure_st
     protected function define_structure() {
 
         $stream = new backup_nested_element('stream', ['id'],
-                ['id', 'course', 'name', 'identifier', 'topic', 'intro', 'introformat']);
+                ['course', 'name', 'identifier', 'topic', 'intro', 'introformat']);
         $stream->set_source_table('stream', ['id' => backup::VAR_ACTIVITYID]);
         $stream->annotate_files('mod_stream', 'intro', null);
 
