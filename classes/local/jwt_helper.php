@@ -25,7 +25,7 @@
 
 namespace mod_stream\local;
 
-use \Exception;
+use Exception;
 
 /**
  * JWT (JSON Web Token) encoding and decoding utility.
