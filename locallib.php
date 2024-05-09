@@ -27,6 +27,8 @@
 
 namespace mod_stream;
 
+use mod_stream\local\jwt_helper;
+
 /**
  * Class stream_video.
  *
@@ -76,7 +78,7 @@ class stream_video {
                 'safetyplayer' => $safetyplayer,
         ];
 
-        $token = \mod_stream\crypt\jwt::encode($config->token, $payload);
+        $token = jwt_helper::encode($config->token, $payload);
 
         return "<div id='stream-background'><iframe width='100%' height='600px' frameborder='0' id='stream-video' " .
                 "allowfullscreen src='{$config->apiendpoint}/embed/{$identifier}?token={$token}'></iframe></div>";

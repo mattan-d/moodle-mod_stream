@@ -23,9 +23,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_stream\crypt;
+namespace mod_stream\local;
 
-use Exception;
+use \Exception;
 
 /**
  * JWT (JSON Web Token) encoding and decoding utility.
@@ -37,7 +37,7 @@ use Exception;
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class jwt {
+class jwt_helper {
 
     /**
      * Supported signing algorithms and their corresponding hashing methods.
