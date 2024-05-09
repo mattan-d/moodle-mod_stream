@@ -14,22 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
- * Embed stream Content
+ * Mobile stream Content
  *
  * @package    mod_stream
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 ob_start();
 header('Access-Control-Allow-Origin: *');
 
 require_once('../../config.php');
 require_once('locallib.php');
-
-global $PAGE, $DB, $CFG, $OUTPUT;
 
 $token = optional_param('user_status', false, PARAM_TEXT);
 if ($token && !isloggedin()) {
@@ -53,17 +49,12 @@ if (!$course) {
     moodle_exception('coursemisconf');
 }
 
-try {
-    require_course_login($course, true, $cm, true, true);
-} catch (Exception $e) {
-    echo '<body style="margin:0">Error!</body>';
-    return;
-}
+require_course_login($course, true, $cm, true, true);
+
 $context = context_module::instance($cm->id);
 require_capability('mod/stream:view', $context);
 
-// Configure page.
-$PAGE->set_url(new \moodle_url('/mod/stream/embed.php', ['id' => $id]));
+$PAGE->set_url(new \moodle_url('/mod/stream/mobile.php', ['id' => $id]));
 $PAGE->set_title(format_string($content['title']));
 $PAGE->set_heading($course->fullname);
 
