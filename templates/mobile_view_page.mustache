@@ -36,8 +36,4 @@
     }
 }}
 {{=<% %>=}}
-<core-format-text text='<iframe src="<% config.wwwroot %>/mod/stream/mobile.php?id=<% cmid %>&user_status=<% session %>&user_id=<% user_id %>"
-                  frameborder="0" allowfullscreen="allowfullscreen"
-                  style="width:100%;height:100%;"
-                  width="100%" height="100%" ></iframe>'>
-</core-format-text>
+<core-iframe src="<% config.wwwroot %>/mod/stream/mobile.php?id=<% cmid %>&user_status=<% session %>&user_id=<% user_id %>" [allowFullscreen]="true"></core-iframe>
