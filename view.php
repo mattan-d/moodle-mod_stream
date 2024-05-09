@@ -65,5 +65,5 @@ if ($stream->intro) {
 
 $safetyplayer = "";
 
-echo streamvideo::player($id, $stream->identifier, $safetyplayer);
+echo mod_stream\stream_video::player($id, $stream->identifier, $safetyplayer);
 echo $OUTPUT->footer();

@@ -60,7 +60,7 @@ class mod_stream_external extends external_api {
                 'term' => $term,
         ]);
 
-        $response = streamvideo::listing($params['term']);
+        $response = mod_stream\stream_video::listing($params['term']);
         return $response;
     }
 

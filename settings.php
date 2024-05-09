@@ -29,7 +29,7 @@ require_once(__DIR__ . '/locallib.php');
 
 if ($ADMIN->fulltree) {
 
-    $check = json_decode(streamvideo::call(['connection' => true]));
+    $check = json_decode(mod_stream\stream_video::call(['connection' => true]));
     if ($check->status == 'failed') {
         $notifyclass = 'notifyproblem';
         $status = 'connectionfailed';

@@ -81,7 +81,7 @@ if ($config->safety) {
     }
 }
 
-$player = streamvideo::player($id, $stream->identifier, $safetyplayer);
+$player = mod_stream\stream_video::player($id, $stream->identifier, $safetyplayer);
 
 echo $OUTPUT->box($player, 'generalbox player', 'streamintro');
 echo $OUTPUT->footer();
