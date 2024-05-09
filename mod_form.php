@@ -66,15 +66,7 @@ class mod_stream_mod_form extends moodleform_mod {
         $mform->addHelpButton('topic', 'topic', 'stream');
 
         $this->standard_intro_elements();
-
-        if (method_exists($PAGE->theme, 'image_url')) {
-            $urlimagem = $PAGE->theme->image_url('icones/loading-bars', 'mod_stream');
-        } else {
-            $urlimagem = $PAGE->theme->pix_url('icones/loading-bars', 'stream');
-        }
-
-        $mform->addElement('html', $OUTPUT->render_from_template('mod_stream/search',
-                ['loadingimg' => $urlimagem, 'placeholder' => get_string('search', 'mod_stream')]));
+        $mform->addElement('html', $OUTPUT->render_from_template('mod_stream/search', []));
 
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
