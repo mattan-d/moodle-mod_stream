@@ -17,12 +17,8 @@
     padding: 15px;
 }
 
-.path-mod-stream #stream-load #stream-elements .list-item-grid {
-    border: 0 none;
-    display: inline-block;
-    padding: 0;
-    margin: 1px;
-    width: 258px;
+.path-mod-stream #stream-load #stream-elements .list-item-grid:hover {
+    cursor: pointer;
 }
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item {
@@ -37,7 +33,7 @@
 }
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item img {
-    width: 225px;
+    width: 100%;
 }
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item .title {

@@ -42,7 +42,7 @@ class mod_stream_mod_form extends moodleform_mod {
      * @throws coding_exception
      */
     public function definition() {
-        global $PAGE;
+        global $PAGE, $OUTPUT;
 
         $mform = $this->_form;
         $PAGE->requires->jquery();
@@ -73,19 +73,8 @@ class mod_stream_mod_form extends moodleform_mod {
             $urlimagem = $PAGE->theme->pix_url('icones/loading-bars', 'stream');
         }
 
-        $html =
-                '<div id="stream-load">' .
-                '    <div id="stream-search" >' .
-                '         <input type="text" class="form-control" id="stream-title-search" placeholder="' .
-                get_string('search', 'stream') . '">' .
-                '    </div>' .
-                '    <div id="stream-elements">' .
-                '        <div style="text-align:center">' . get_string('loadind', 'stream') . '</div>' .
-                '        <div style="text-align:center"><img height="80" src="' . $urlimagem . '" ></div>' .
-                '    </div>' .
-                '    <div id="stream-pagination"></div>' .
-                '</div>';
-        $mform->addElement('html', $html, 'stream', 'name');
+        $mform->addElement('html', $OUTPUT->render_from_template('mod_stream/search',
+                ['loadingimg' => $urlimagem, 'placeholder' => get_string('search', 'mod_stream')]));
 
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();

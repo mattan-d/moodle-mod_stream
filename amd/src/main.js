@@ -88,7 +88,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                     self.elements.html("");
                     $.each(response.videos, function(key, video) {
                         var html =
-                            '<div class="list-item-grid" data-itemid="' + video.id + '" id="video_identifier_' + video.id + '">' +
+                            '<div class="col list-item-grid" data-itemid="' + video.id + '" ' +
+                            'id="video_identifier_' + video.id + '">' +
                             '    <span class="item" >' +
                             '        <img src="' + video.thumbnail + '" height="133" width="236"><br>' +
                             '        <span class="title">' + video.title + '</span>' +
