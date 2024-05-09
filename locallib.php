@@ -25,15 +25,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_stream;
+
 /**
  * Class stream_video.
  *
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace mod_stream;
-
 class stream_video {
 
     /**

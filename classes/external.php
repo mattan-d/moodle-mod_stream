@@ -52,6 +52,7 @@ class mod_stream_external extends external_api {
      * Listing videos.
      *
      * @param string $term
+     * @param int $courseid
      * @return array
      * @throws dml_exception
      * @throws invalid_parameter_exception
@@ -59,7 +60,7 @@ class mod_stream_external extends external_api {
     public static function listing($term, $courseid) {
         $params = self::validate_parameters(self::listing_parameters(), [
                 'term' => $term,
-                'courseid' => $courseid
+                'courseid' => $courseid,
         ]);
 
         $context = context_course::instance($params['courseid']);
