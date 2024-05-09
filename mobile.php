@@ -21,10 +21,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 ob_start();
 header('Access-Control-Allow-Origin: *');
 
-require_once('../../config.php');
 require_once('locallib.php');
 
 $token = optional_param('user_status', false, PARAM_TEXT);
