@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class for ajax call
+ * mod_stream module external API
  *
  * @package    mod_stream
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
@@ -29,7 +29,7 @@ require_once(__DIR__ . '/crypt/jwt.php');
 require_once(__DIR__ . '/../locallib.php');
 
 /**
- * Class for ajax call.
+ * Class for connecting to a Stream server and handling AJAX calls.
  *
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -37,13 +37,13 @@ require_once(__DIR__ . '/../locallib.php');
 class mod_stream_external extends external_api {
 
     /**
-     * Listing parameters.
+     * Connects to a stream and retrieves meta-data about a videos.
      *
-     * @return external_function_parameters
+     * @return external_function_parameters Parameters for listing instances.
      */
     public static function listing_parameters() {
         return new \external_function_parameters([
-                'term' => new \external_value(PARAM_TEXT, 'Instance term of guest enrolment plugin.', VALUE_OPTIONAL),
+                'term' => new \external_value(PARAM_TEXT, 'Search term to filter results.'),
         ]);
     }
 
