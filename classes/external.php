@@ -44,6 +44,7 @@ class mod_stream_external extends external_api {
     public static function listing_parameters() {
         return new \external_function_parameters([
                 'term' => new \external_value(PARAM_TEXT, 'Search term to filter results.'),
+                'courseid' => new \external_value(PARAM_INT, 'the course ID.'),
         ]);
     }
 
@@ -55,10 +56,16 @@ class mod_stream_external extends external_api {
      * @throws dml_exception
      * @throws invalid_parameter_exception
      */
-    public static function listing($term) {
+    public static function listing($term, $courseid) {
         $params = self::validate_parameters(self::listing_parameters(), [
                 'term' => $term,
+                'courseid' => $courseid
         ]);
+
+        $context = context_course::instance($params['courseid']);
+        self::validate_context($context);
+
+        require_capability('moodle/course:update', $context);
 
         $response = mod_stream\stream_video::listing($params['term']);
         return $response;

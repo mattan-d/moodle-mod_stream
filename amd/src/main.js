@@ -57,7 +57,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             ajax.call([{
                 methodname: 'mod_stream_video_list',
                 args: {
-                    term: $('#stream-title-search').val()
+                    term: $('#stream-title-search').val(),
+                    courseid: $('input[name="course"]').val()
                 }
             }])[0]
                 .then(function(response) {

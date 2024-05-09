@@ -56,6 +56,9 @@ class mobile {
                 'user_id' => $USER->id,
         ];
 
+        // Capabilities check.
+        require_login($args['courseid'], false, $args['cmid'], true, true);
+
         return [
                 'templates' => [
                         [
