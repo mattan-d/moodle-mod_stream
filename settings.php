@@ -28,9 +28,9 @@ require_once($CFG->libdir . '/resourcelib.php');
 require_once(__DIR__ . '/locallib.php');
 
 if ($ADMIN->fulltree) {
-
-    $check = json_decode(mod_stream\stream_video::call(['connection' => true]));
-    if ($check->status == 'failed') {
+    $helper = new \mod_stream\stream_video();
+    $check = json_decode($helper->call(['connection' => true]));
+    if (isset($check->status) && $check->status == 'failed') {
         $notifyclass = 'notifyproblem';
         $status = 'connectionfailed';
         $errormessage = $check->description;

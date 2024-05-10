@@ -93,20 +93,24 @@ class stream_video {
         global $CFG;
 
         $config = get_config('stream');
-        $url = $config->apiendpoint . '/webservice/api/v2';
+        if (isset($config->apiendpoint)) {
+            $url = $config->apiendpoint . '/webservice/api/v2';
 
-        $headers = [
-                'Authorization: Bearer ' . $config->accountid,
-        ];
+            $headers = [
+                    'Authorization: Bearer ' . $config->accountid,
+            ];
 
-        $options = [
-                'CURLOPT_POST' => true,
-                'CURLOPT_RETURNTRANSFER' => true,
-                'CURLOPT_HTTPHEADER' => $headers,
-        ];
+            $options = [
+                    'CURLOPT_POST' => true,
+                    'CURLOPT_RETURNTRANSFER' => true,
+                    'CURLOPT_HTTPHEADER' => $headers,
+            ];
 
-        $curl = new \curl();
-        $output = $curl->post($url, $data, $options);
+            $curl = new \curl();
+            $output = $curl->post($url, $data, $options);
+        } else {
+            $output = false;
+        }
 
         return $output;
     }
