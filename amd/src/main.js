@@ -79,7 +79,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
         failed: function(error, self) {
             return str.get_string('connectionfailed', 'mod_stream')
                 .then(function(connectionfailed) {
-                    return self.elements.html('<div class="alert alert-danger">' + connectionfailed + error.message + '</div>');
+                    return self.elements.html('<div class="alert alert-danger">' + connectionfailed + '</div>');
                 });
         },
         list: function(response, self) {
