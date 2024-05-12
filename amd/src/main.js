@@ -77,7 +77,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             }, 100);
         },
         failed: function(error, self) {
-            return str.get_string('connectionfailed', 'mod_stream')
+            return str.get_string('servererror', 'moodle')
                 .then(function(connectionfailed) {
                     return self.elements.html('<div class="alert alert-danger">' + connectionfailed + '</div>');
                 });
@@ -92,7 +92,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                             '<div class="col list-item-grid" data-itemid="' + video.id + '" ' +
                             'id="video_identifier_' + video.id + '">' +
                             '    <span class="item" >' +
-                            '        <img src="' + video.thumbnail + '" height="133" width="236"><br>' +
+                            '        <div class="thumbnail"><img src="' + video.thumbnail + '" class="img-fluid img-rounded">' +
+                            '        <span class="duration">' + video.duration + '</span></div>' +
                             '        <span class="title">' + video.title + '</span>' +
                             '    </span>' +
                             '</div>';

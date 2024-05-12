@@ -87,6 +87,7 @@ class mod_stream_external extends external_api {
                                         'thumbnail' => new external_value(PARAM_TEXT, 'Thumbnail URL of the video.'),
                                         'size' => new external_value(PARAM_INT, 'Size of the video in bytes.'),
                                         'date' => new external_value(PARAM_INT, 'Date of the video in Unix timestamp format.'),
+                                        'duration' => new external_value(PARAM_TEXT, 'Duration of the video.'),
                                         'source' => new external_value(PARAM_TEXT, 'Source URL of the video.'),
                                         'author' => new external_value(PARAM_INT, 'ID of the author of the video.'),
                                         'datecreated' => new external_value(PARAM_INT,
