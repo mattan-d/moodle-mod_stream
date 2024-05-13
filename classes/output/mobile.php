@@ -58,7 +58,7 @@ class mobile {
                 'templates' => [
                         [
                                 'id' => 'main',
-                                'html' => json_encode($args),
+                                'html' => $OUTPUT->render_from_template('mod_stream/mobile_view_page', $data),
                         ],
                 ],
                 'javascript' => file_get_contents(__DIR__ . '/mobile.js'),
