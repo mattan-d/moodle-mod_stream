@@ -81,7 +81,7 @@ class stream_video {
         $token = jwt_helper::encode($config->token, $payload);
 
         return "<div id='stream-background'><iframe width='100%' height='600px' frameborder='0' id='stream-video' " .
-                "allowfullscreen src='{$config->apiendpoint}/embed/{$identifier}?token={$token}'></iframe></div>";
+                "allowfullscreen src='{$config->apiendpoint}/embed/{$identifier}/{$token}'></iframe></div>";
     }
 
     /**
