@@ -67,7 +67,9 @@ class mod_stream_external extends external_api {
 
         require_capability('moodle/course:update', $context);
 
-        $response = mod_stream\stream_video::listing($params['term']);
+        $helper = new \mod_stream\stream_video();
+        $response = $helper->listing($params['term']);
+
         return $response;
     }
 
