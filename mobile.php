@@ -45,6 +45,8 @@ require_course_login($course, true, $cm, true, true);
 $context = context_module::instance($cm->id);
 require_capability('mod/stream:view', $context);
 
+$stream = $DB->get_record('stream', ['id' => $cm->instance], '*', MUST_EXIST);
+
 $PAGE->set_url(new \moodle_url('/mod/stream/mobile.php', ['id' => $id]));
 $PAGE->set_title(format_string($content['title']));
 $PAGE->set_heading($course->fullname);
