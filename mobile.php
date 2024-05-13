@@ -28,16 +28,6 @@ header('Access-Control-Allow-Origin: *');
 
 require_once('locallib.php');
 
-$token = optional_param('user_status', false, PARAM_TEXT);
-if ($token && !isloggedin()) {
-    $externaltokens = $DB->get_record('external_tokens', ['token' => $token], '*', IGNORE_MISSING);
-
-    if ($externaltokens) {
-        $user = $DB->get_record('user', ['id' => $externaltokens->userid], '*', IGNORE_MISSING);
-        complete_user_login($user);
-    }
-}
-
 $id = required_param('id', PARAM_INT);
 
 // Verify course context.
