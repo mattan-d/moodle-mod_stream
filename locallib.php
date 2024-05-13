@@ -45,7 +45,7 @@ class stream_video {
      * @return array
      * @throws dml_exception
      */
-    public static function listing($term) {
+    public function listing($term) {
         global $USER;
 
         $json = self::call([
@@ -66,7 +66,7 @@ class stream_video {
      * @return string
      * @throws dml_exception
      */
-    public static function player($cmid, $identifier, $safetyplayer) {
+    public function player($cmid, $identifier, $safetyplayer) {
         global $USER;
 
         $config = get_config('stream');
@@ -89,7 +89,7 @@ class stream_video {
      *
      * @param array $data
      */
-    public static function call($data = []) {
+    public function call($data = []) {
         global $CFG;
 
         $config = get_config('stream');
