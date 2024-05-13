@@ -52,18 +52,13 @@ class mobile {
 
         $data = [
                 'cmid' => $args['cmid'],
-                'session' => optional_param('wstoken', '', PARAM_TEXT),
-                'user_id' => $USER->id,
         ];
-
-        // Capabilities check.
-        require_login($args['courseid'], false, $args['cmid'], true, true);
 
         return [
                 'templates' => [
                         [
                                 'id' => 'main',
-                                'html' => $OUTPUT->render_from_template('mod_stream/mobile_view_page', $data),
+                                'html' => json_encode($args),
                         ],
                 ],
                 'javascript' => file_get_contents(__DIR__ . '/mobile.js'),
