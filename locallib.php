@@ -89,7 +89,7 @@ class stream_video {
      *
      * @param array $data
      */
-    public function call($data = []) {
+    public static function call($data = []) {
         global $CFG;
 
         $config = get_config('stream');
