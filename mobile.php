@@ -21,7 +21,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+require_once(__DIR__ . '/../../config.php');
 
 ob_start();
 header('Access-Control-Allow-Origin: *');
@@ -44,6 +44,8 @@ require_course_login($course, true, $cm, true, true);
 
 $context = context_module::instance($cm->id);
 require_capability('mod/stream:view', $context);
+
+$stream = $DB->get_record('stream', ['id' => $cm->instance], '*', MUST_EXIST);
 
 $PAGE->set_url(new \moodle_url('/mod/stream/mobile.php', ['id' => $id]));
 $PAGE->set_title(format_string($content['title']));
