@@ -39,4 +39,13 @@ To integrate Stream seamlessly into your Moodle platform and explore its full po
 
 For further details and inquiries, feel free to [contact us](https://centricstream.co.il/en/) via our contact form or email.
 
+Branches
+--------
+The following git branches are supported:
+
+| Moodle version     | Branch            |
+|--------------------|-------------------|
+| Moodle 3.4 to 4.1  | MOODLE_401 |
+| Moodle 4.2         | MOODLE_402 |
+
 **Stream © 2024**
