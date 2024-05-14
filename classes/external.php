@@ -27,6 +27,11 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 require_once(__DIR__ . '/../locallib.php');
 
+use core_external\external_function_parameters;
+use core_external\external_value;
+use core_external\external_single_structure;
+use core_external\external_multiple_structure;
+
 /**
  * Class for connecting to a Stream server and handling AJAX calls.
  *
