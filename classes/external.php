@@ -69,10 +69,7 @@ class mod_stream_external extends core_external\external_api {
 
         $helper = new \mod_stream\stream_video();
         $response = $helper->listing($params['term']);
-<<<<<<< HEAD
 
-=======
->>>>>>> MOODLE_402
         return $response;
     }
 
