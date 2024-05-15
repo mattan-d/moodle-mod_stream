@@ -22,15 +22,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_stream\external;
+
+use external_function_parameters;
+use external_multiple_structure;
+use external_single_structure;
+use external_value;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
-require_once(__DIR__ . '/../locallib.php');
-
-use core_external\external_function_parameters;
-use core_external\external_value;
-use core_external\external_single_structure;
-use core_external\external_multiple_structure;
+require_once($CFG->dirroot . '/mod/stream/locallib.php');
 
 /**
  * Class for connecting to a Stream server and handling AJAX calls.
@@ -38,14 +40,14 @@ use core_external\external_multiple_structure;
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_stream_external extends core_external\external_api {
+class listing extends \core_external\external_api {
 
     /**
      * Connects to a stream and retrieves meta-data about a videos.
      *
      * @return external_function_parameters Parameters for listing instances.
      */
-    public static function listing_parameters() {
+    public static function execute_parameters() {
         return new \external_function_parameters([
                 'term' => new \external_value(PARAM_TEXT, 'Search term to filter results.'),
                 'courseid' => new \external_value(PARAM_INT, 'the course ID.'),
@@ -61,7 +63,7 @@ class mod_stream_external extends core_external\external_api {
      * @throws dml_exception
      * @throws invalid_parameter_exception
      */
-    public static function listing($term, $courseid) {
+    public static function execute($term, $courseid) {
         $params = self::validate_parameters(self::listing_parameters(), [
                 'term' => $term,
                 'courseid' => $courseid,
@@ -83,7 +85,7 @@ class mod_stream_external extends core_external\external_api {
      *
      * @return external_single_structure
      */
-    public static function listing_returns() {
+    public static function execute_returns() {
         return new external_single_structure([
                 'status' => new external_value(PARAM_TEXT, 'Status of the request.'),
                 'videos' => new external_multiple_structure(
