@@ -26,9 +26,8 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = [
         'mod_stream_video_list' => [
-                'classname' => 'mod_stream_external',
-                'methodname' => 'listing',
-                'classpath' => 'mod/stream/classes/external.php',
+                'classname' => 'mod_stream\external\listing',
+                'methodname' => 'execute',
                 'description' => 'Retrieves the pertinent videos through the Stream system API.',
                 'type' => 'read',
                 'ajax' => true,
