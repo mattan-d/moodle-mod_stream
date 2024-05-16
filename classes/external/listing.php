@@ -32,6 +32,7 @@ use external_value;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/externallib.php');
 require_once($CFG->dirroot . '/mod/stream/locallib.php');
 
 /**
@@ -47,10 +48,10 @@ class listing extends \core_external\external_api {
      *
      * @return external_function_parameters Parameters for listing instances.
      */
-    public static function execute_parameters() {
-        return new \external_function_parameters([
-                'term' => new \external_value(PARAM_TEXT, 'Search term to filter results.'),
-                'courseid' => new \external_value(PARAM_INT, 'the course ID.'),
+    public static function execute_parameters(): external_function_parameters {
+        return new external_function_parameters([
+                'term' => new external_value(PARAM_TEXT, 'Search term to filter results.'),
+                'courseid' => new external_value(PARAM_INT, 'the course ID.'),
         ]);
     }
 
@@ -64,12 +65,12 @@ class listing extends \core_external\external_api {
      * @throws invalid_parameter_exception
      */
     public static function execute($term, $courseid) {
-        $params = self::validate_parameters(self::listing_parameters(), [
+        $params = self::validate_parameters(self::execute_parameters(), [
                 'term' => $term,
                 'courseid' => $courseid,
         ]);
 
-        $context = context_course::instance($params['courseid']);
+        $context = \context_course::instance($params['courseid']);
         self::validate_context($context);
 
         require_capability('moodle/course:update', $context);
