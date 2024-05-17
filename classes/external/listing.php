@@ -41,7 +41,7 @@ require_once($CFG->dirroot . '/mod/stream/locallib.php');
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class listing extends \core_external\external_api {
+class listing extends \external_api {
 
     /**
      * Connects to a stream and retrieves meta-data about a videos.
