@@ -1,6 +1,6 @@
 # Stream Moodle Plugin
 
-![Stream Logo](https://centricstream.co.il/images/logo.svg)
+![Stream Logo](https://stream-platform.cloud/images/logo.svg)
 
 
 [![Maintained by Mattan Dor (CentricApp)](https://img.shields.io/badge/Maintained%20by-Mattan%20Dor%20(CentricApp)-brightgreen)](https://centricapp.co.il)
@@ -37,7 +37,7 @@ Stream is a revolutionary video platform tailored for academic institutions, off
 ## Get Started
 To integrate Stream seamlessly into your Moodle platform and explore its full potential, schedule a consultation with our team. We are committed to understanding your organization's unique needs and providing personalized assistance.
 
-For further details and inquiries, feel free to [contact us](https://centricstream.co.il/en/) via our contact form or email.
+For further details and inquiries, feel free to [contact us](https://stream-platform.cloud/en/) via our contact form or email.
 
 Branches
 --------
