@@ -54,7 +54,7 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configtext('stream/apiendpoint',
             get_string('apiendpoint', 'mod_stream'),
-            get_string('apiendpoint_desc', 'mod_stream'), 'https://moodle.centricstream.co.il'));
+            get_string('apiendpoint_desc', 'mod_stream'), 'https://demo.stream-platform.cloud'));
 
     $settings->add(new admin_setting_configpasswordunmask('stream/accountid',
             get_string('accountid', 'mod_stream'),
