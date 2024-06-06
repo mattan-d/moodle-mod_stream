@@ -75,10 +75,10 @@ function stream_add_instance(stdClass $stream, $mform = null) {
  * will update an existing instance with new data.
  *
  * @param stdClass $stream An object from the form in mod_form.php
- * @param mod_stream_mod_form $mform The form instance itself (if needed)
+ * @param $mform The form instance itself (if needed)
  * @return boolean Success/Fail
  */
-function stream_update_instance(stdClass $stream, mod_stream_mod_form $mform = null) {
+function stream_update_instance(stdClass $stream, $mform = null) {
     global $DB;
 
     $stream->timemodified = time();
