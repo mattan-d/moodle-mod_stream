@@ -55,7 +55,7 @@ function stream_supports($feature) {
  * of the new instance.
  *
  * @param stdClass $stream Submitted data from the form in mod_form.php
- * @param mod_stream_mod_form $mform The form instance itself (if needed)
+ * @param $mform The form instance itself (if needed)
  * @return int The id of the newly inserted stream record
  */
 function stream_add_instance(stdClass $stream, $mform = null) {
