@@ -58,7 +58,7 @@ function stream_supports($feature) {
  * @param mod_stream_mod_form $mform The form instance itself (if needed)
  * @return int The id of the newly inserted stream record
  */
-function stream_add_instance(stdClass $stream, mod_stream_mod_form $mform = null) {
+function stream_add_instance(stdClass $stream, $mform = null) {
     global $DB;
 
     $stream->timecreated = time();
