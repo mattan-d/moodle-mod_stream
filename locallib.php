@@ -98,7 +98,7 @@ class stream_video {
 
             $headers = [
                     'Authorization: Bearer ' . $config->accountid,
-                    'Accept: application/json'
+                    'Accept: application/json',
             ];
 
             $options = [
