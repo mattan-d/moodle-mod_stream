@@ -22,31 +22,31 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], function ($, ajax, notification, str, url) {
+define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], function($, ajax, notification, str, url) {
     'use strict';
 
     return {
-        init: function () {
+        init: function() {
             var self = this;
 
             this.elements = $('#stream-elements');
             this.loadingbars = url.imageUrl('icones/loading-bars', 'stream');
 
-            $('body').on('click', '#stream-elements .list-item-grid', function () {
+            $('body').on('click', '#stream-elements .list-item-grid', function() {
                 var itemid = $(this).data('itemid');
                 var topic = $(this).find('.title').text();
 
                 self.selected(itemid, topic);
             });
 
-            $('body').on('click', '.btn-upload', function (e) {
+            $('body').on('click', '.btn-upload', function(e) {
                 e.preventDefault();
                 $('#upload_stream').toggle();
             });
 
             $('#stream-title-search')
                 .val($('#id_topic').val())
-                .keyup(function () {
+                .keyup(function() {
                     self.load();
                 });
 
@@ -55,7 +55,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             // Add event listener to receive messages from iframes
             window.addEventListener('message', this.message, false);
         },
-        message: function (event) {
+        message: function(event) {
             // Check if the message contains the streamid
             if (event.data && event.data.streamid) {
                 $('#id_identifier').val(event.data.streamid);
@@ -63,7 +63,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                 $('#upload_stream').hide();
             }
         },
-        load: function () {
+        load: function() {
             var self = this;
             self.elements.html('<div style="text-align:center"><img height="80" src="' + self.loadingbars + '" ></div>');
             $('html, body').animate({
@@ -77,33 +77,33 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                     courseid: $('input[name="course"]').val()
                 }
             }])[0]
-                .then(function (response) {
+                .then(function(response) {
                     return self.list(response, self);
                 })
-                .catch(function (error) {
+                .catch(function(error) {
                     return self.failed(error, self);
                 });
         },
-        selected: function (identifier, topic) {
-            setTimeout(function () {
+        selected: function(identifier, topic) {
+            setTimeout(function() {
                 $('#id_identifier').val(identifier);
                 $('#id_topic').val(topic);
                 $('.list-item-grid').find('.item').removeClass('selected');
                 $('#video_identifier_' + identifier).find('.item').addClass('selected');
             }, 100);
         },
-        failed: function (error, self) {
+        failed: function(error, self) {
             return str.get_string('servererror', 'moodle')
-                .then(function (connectionfailed) {
+                .then(function(connectionfailed) {
                     return self.elements.html('<div class="alert alert-danger">' + connectionfailed + '</div>');
                 });
         },
-        list: function (response, self) {
+        list: function(response, self) {
             self.selected($('#id_identifier').val(), $('#id_topic').val());
             if (response.status == 'success') {
                 if (response.videos.length) {
                     self.elements.html("");
-                    $.each(response.videos, function (key, video) {
+                    $.each(response.videos, function(key, video) {
                         var html = '<div class="col list-item-grid" data-itemid="' + video.id + '" ' +
                             'id="video_identifier_' + video.id + '">' + '<span class="item" ><div class="thumbnail">' +
                             '<img src="' + video.thumbnail + '" class="img-fluid img-rounded">' +
@@ -113,7 +113,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                     });
                 } else {
                     return str.get_string('noresults', 'mod_stream')
-                        .then(function (noresults) {
+                        .then(function(noresults) {
                             return self.elements.html('<div class="alert alert-info">' + noresults + '</div>');
                         });
                 }
