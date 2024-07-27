@@ -1,3 +1,10 @@
+.path-mod-stream #upload_stream {
+    width: 100%;
+    height: 220px;
+    border: 0;
+    display: none;
+}
+
 .path-mod-stream #stream-load {
     background: rgba(224, 224, 224, 0.5294117647);
     padding: 5px;
