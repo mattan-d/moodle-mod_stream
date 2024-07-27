@@ -69,7 +69,7 @@ class mod_stream_mod_form extends moodleform_mod {
         $mform->addElement('html', $OUTPUT->render_from_template('mod_stream/search', [
                 'endpoint' => get_config('stream', 'apiendpoint'),
                 'token' => get_config('stream', 'accountid'),
-                'email' => $USER->email
+                'email' => $USER->email,
         ]));
 
         $this->standard_coursemodule_elements();
