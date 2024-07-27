@@ -33,7 +33,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             this.loadingbars = url.imageUrl('icones/loading-bars', 'stream');
 
             $('body').on('click', '#stream-elements .list-item-grid', function () {
-                var itemid = $(this).data('itemid'), topic = $(this).find('.title').text();
+                var itemid = $(this).data('itemid');
+                var topic = $(this).find('.title').text();
 
                 self.selected(itemid, topic);
             });
@@ -53,14 +54,16 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
 
             // Add event listener to receive messages from iframes
             window.addEventListener('message', this.message, false);
-        }, message: function (event) {
+        },
+        message: function (event) {
             // Check if the message contains the streamid
             if (event.data && event.data.streamid) {
                 $('#id_identifier').val(event.data.streamid);
                 $('#id_topic').val(event.data.topic);
                 $('#upload_stream').hide();
             }
-        }, load: function () {
+        },
+        load: function () {
             var self = this;
             self.elements.html('<div style="text-align:center"><img height="80" src="' + self.loadingbars + '" ></div>');
             $('html, body').animate({
@@ -68,8 +71,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             }, 800);
 
             ajax.call([{
-                methodname: 'mod_stream_video_list', args: {
-                    term: $('#stream-title-search').val(), courseid: $('input[name="course"]').val()
+                methodname: 'mod_stream_video_list',
+                args: {
+                    term: $('#stream-title-search').val(),
+                    courseid: $('input[name="course"]').val()
                 }
             }])[0]
                 .then(function (response) {
@@ -78,19 +83,22 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                 .catch(function (error) {
                     return self.failed(error, self);
                 });
-        }, selected: function (identifier, topic) {
+        },
+        selected: function (identifier, topic) {
             setTimeout(function () {
                 $('#id_identifier').val(identifier);
                 $('#id_topic').val(topic);
                 $('.list-item-grid').find('.item').removeClass('selected');
                 $('#video_identifier_' + identifier).find('.item').addClass('selected');
             }, 100);
-        }, failed: function (error, self) {
+        },
+        failed: function (error, self) {
             return str.get_string('servererror', 'moodle')
                 .then(function (connectionfailed) {
                     return self.elements.html('<div class="alert alert-danger">' + connectionfailed + '</div>');
                 });
-        }, list: function (response, self) {
+        },
+        list: function (response, self) {
             self.selected($('#id_identifier').val(), $('#id_topic').val());
             if (response.status == 'success') {
                 if (response.videos.length) {
