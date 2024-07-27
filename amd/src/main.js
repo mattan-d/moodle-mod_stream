@@ -33,10 +33,15 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             this.loadingbars = url.imageUrl('icones/loading-bars', 'stream');
 
             $('body').on('click', '#stream-elements .list-item-grid', function() {
-                var itemid = $(this).data('itemid'),
-                    topic = $(this).find('.title').text();
+                var itemid = $(this).data('itemid');
+                var topic = $(this).find('.title').text();
 
                 self.selected(itemid, topic);
+            });
+
+            $('body').on('click', '.btn-upload', function(e) {
+                e.preventDefault();
+                $('#upload_stream').toggle();
             });
 
             $('#stream-title-search')
@@ -46,6 +51,17 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                 });
 
             this.load();
+
+            // Add event listener to receive messages from iframes
+            window.addEventListener('message', this.message, false);
+        },
+        message: function(event) {
+            // Check if the message contains the streamid
+            if (event.data && event.data.streamid) {
+                $('#id_identifier').val(event.data.streamid);
+                $('#id_topic').val(event.data.topic);
+                $('#upload_stream').hide();
+            }
         },
         load: function() {
             var self = this;
@@ -88,15 +104,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                 if (response.videos.length) {
                     self.elements.html("");
                     $.each(response.videos, function(key, video) {
-                        var html =
-                            '<div class="col list-item-grid" data-itemid="' + video.id + '" ' +
-                            'id="video_identifier_' + video.id + '">' +
-                            '    <span class="item" >' +
-                            '        <div class="thumbnail"><img src="' + video.thumbnail + '" class="img-fluid img-rounded">' +
-                            '        <span class="duration">' + video.duration + '</span></div>' +
-                            '        <span class="title">' + video.title + '</span>' +
-                            '    </span>' +
-                            '</div>';
+                        var html = '<div class="col list-item-grid" data-itemid="' + video.id + '" ' +
+                            'id="video_identifier_' + video.id + '">' + '<span class="item" ><div class="thumbnail">' +
+                            '<img src="' + video.thumbnail + '" class="img-fluid img-rounded">' +
+                            '<span class="duration">' + video.duration + '</span></div><span class="title">' + video.title +
+                            '</span></span></div>';
                         self.elements.append(html);
                     });
                 } else {

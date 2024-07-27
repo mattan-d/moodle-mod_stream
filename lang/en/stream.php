@@ -59,3 +59,4 @@ $string['stream:addinstance'] = 'Add a new STREAM';
 $string['stream:view'] = 'View STREAM';
 $string['topic'] = 'Video Topic';
 $string['topic_help'] = 'the video topic from stream server.';
+$string['upload'] = 'Upload';

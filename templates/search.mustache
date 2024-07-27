@@ -33,6 +33,15 @@
         "courseid": 3
     }
 }}
+<div>
+    <div class="row">
+        <div class="col p-3">
+            <a href="#" class="btn btn-primary btn-upload">{{#str}}upload, mod_stream{{/str}}</a>
+        </div>
+    </div>
+</div>
+
+<iframe src="{{endpoint}}/videos/miniupload?moodle=1&token={{token}}&email={{email}}" id="upload_stream"></iframe>
 <div id="stream-load">
     <div class="row" id="stream-search">
         <div class="col">
