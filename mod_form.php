@@ -42,7 +42,7 @@ class mod_stream_mod_form extends moodleform_mod {
      * @throws coding_exception
      */
     public function definition() {
-        global $PAGE, $OUTPUT;
+        global $PAGE, $OUTPUT, $USER;
 
         $mform = $this->_form;
         $PAGE->requires->jquery();
@@ -66,7 +66,11 @@ class mod_stream_mod_form extends moodleform_mod {
         $mform->addHelpButton('topic', 'topic', 'stream');
 
         $this->standard_intro_elements();
-        $mform->addElement('html', $OUTPUT->render_from_template('mod_stream/search', []));
+        $mform->addElement('html', $OUTPUT->render_from_template('mod_stream/search', [
+                'endpoint' => get_config('stream', 'apiendpoint'),
+                'token' => get_config('stream', 'accountid'),
+                'email' => $USER->email
+        ]));
 
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
