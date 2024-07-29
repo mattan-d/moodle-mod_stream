@@ -53,14 +53,23 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             this.load();
 
             // Add event listener to receive messages from iframes
-            window.addEventListener('message', this.message, false);
+            window.addEventListener('message', (event) => this.message(event, self), false);
         },
         message: function(event) {
             // Check if the message contains the streamid
             if (event.data && event.data.streamid) {
                 $('#id_identifier').val(event.data.streamid);
                 $('#id_topic').val(event.data.topic);
+                $('#stream-title-search').val(event.data.topic);
                 $('#upload_stream').hide();
+
+                self.elements.html("");
+                var html = '<div class="col list-item-grid" data-itemid="' + event.data.streamid + '" ' +
+                    'id="video_identifier_' + event.data.streamid + '"><span class="item selected"><div class="thumbnail">' +
+                    '<img src="' + event.data.thumbnail + '" class="img-fluid img-rounded">' +
+                    '</div><span class="title">' + event.data.topic +
+                    '</span></span></div>';
+                self.elements.append(html);
             }
         },
         load: function() {
