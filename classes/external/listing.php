@@ -41,7 +41,7 @@ require_once($CFG->dirroot . '/mod/stream/locallib.php');
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class listing extends \core_external\external_api {
+class listing extends \external_api {
 
     /**
      * Connects to a stream and retrieves meta-data about a videos.
@@ -100,8 +100,10 @@ class listing extends \core_external\external_api {
                                         'duration' => new external_value(PARAM_TEXT, 'Duration of the video.'),
                                         'source' => new external_value(PARAM_TEXT, 'Source URL of the video.'),
                                         'author' => new external_value(PARAM_INT, 'ID of the author of the video.'),
-                                        'datecreated' => new external_value(PARAM_INT,
+                                        'datecreated' => new external_value(PARAM_TEXT,
                                                 'Date the video was created in Unix timestamp format.'),
+                                        'views' => new external_value(PARAM_INT, 'Views of the video.'),
+                                        'elapsed' => new external_value(PARAM_TEXT, 'Video creation time elapsed.'),
                                 ]
                         )
                 ),
