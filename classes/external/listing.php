@@ -100,8 +100,10 @@ class listing extends \external_api {
                                         'duration' => new external_value(PARAM_TEXT, 'Duration of the video.'),
                                         'source' => new external_value(PARAM_TEXT, 'Source URL of the video.'),
                                         'author' => new external_value(PARAM_INT, 'ID of the author of the video.'),
-                                        'datecreated' => new external_value(PARAM_INT,
+                                        'datecreated' => new external_value(PARAM_TEXT,
                                                 'Date the video was created in Unix timestamp format.'),
+                                        'views' => new external_value(PARAM_INT, 'Views of the video.'),
+                                        'elapsed' => new external_value(PARAM_TEXT, 'Video creation time elapsed.'),
                                 ]
                         )
                 ),

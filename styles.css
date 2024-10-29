@@ -50,6 +50,18 @@
     border-radius: 10px;
 }
 
+.path-mod-stream #stream-load #stream-elements .list-item-grid .item .thumbnail .datecreated {
+    position: absolute;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.72);
+    width: fit-content;
+    left: 8px;
+    top: 8px;
+    font-size: 8px;
+}
+
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item .thumbnail .duration {
     position: absolute;
     color: #fff;
@@ -66,10 +78,26 @@
     display: block;
     color: #4c4949;
     margin-top: 5px;
+    font-weight: 600;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     text-align: left;
+}
+
+.path-mod-stream #stream-load #stream-elements .list-item-grid .item .details {
+    color: #4c4949;
+    margin-top: 5px;
+    overflow: hidden;
+    text-align: left;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.path-mod-stream #stream-load #stream-elements .list-item-grid .item .details .bubble {
+    color: #4c4949;
+    font-size: 6px;
+    margin-right: 5px;
+    margin-left: 5px;
 }
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item:hover {
@@ -89,6 +117,14 @@
 }
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item.selected .title {
+    color: #fff;
+}
+
+.path-mod-stream #stream-load #stream-elements .list-item-grid .item.selected .details {
+    color: #fff;
+}
+
+.path-mod-stream #stream-load #stream-elements .list-item-grid .item.selected .details .bubble {
     color: #fff;
 }
 
