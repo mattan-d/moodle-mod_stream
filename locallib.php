@@ -52,7 +52,7 @@ class stream_video {
         $json = self::call([
                 'term' => $term,
                 'email' => $USER->email,
-                'sort' => $sort
+                'sort' => $sort,
         ]);
 
         return json_decode($json);
