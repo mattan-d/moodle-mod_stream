@@ -39,6 +39,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                 self.selected(itemid, topic);
             });
 
+            $('body').on('click', '#stream-load #stream-sort .btn', function (e) {
+                e.preventDefault();
+                $('#stream-load #stream-sort .btn').removeClass('active');
+                $(this).toggleClass('active');
+                self.load();
+            });
+
             $('body').on('click', '.btn-upload', function (e) {
                 e.preventDefault();
                 $('#upload_stream').toggle();
@@ -70,14 +77,13 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             }
         }, load: function () {
             var self = this;
+            var sort = $('#stream-load #stream-sort .btn.active').attr('data-name');
+
             self.elements.html('<div style="text-align:center"><img height="80" src="' + self.loadingbars + '" ></div>');
-            $('html, body').animate({
-                scrollTop: self.elements.offset().top - 100
-            }, 800);
 
             ajax.call([{
                 methodname: 'mod_stream_video_list', args: {
-                    term: $('#stream-title-search').val(), courseid: $('input[name="course"]').val()
+                    term: $('#stream-title-search').val(), courseid: $('input[name="course"]').val(), sort: sort
                 }
             }])[0]
                 .then(function (response) {

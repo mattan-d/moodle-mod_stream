@@ -41,16 +41,18 @@ class stream_video {
      * Call for list videos in stream.
      *
      * @param string $term
+     * @param string $sort
      *
      * @return array
      * @throws dml_exception
      */
-    public static function listing($term) {
+    public static function listing($term, $sort) {
         global $USER;
 
         $json = self::call([
                 'term' => $term,
                 'email' => $USER->email,
+                'sort' => $sort
         ]);
 
         return json_decode($json);

@@ -43,6 +43,14 @@
 
 <iframe src="{{endpoint}}/videos/miniupload?moodle=1&token={{token}}&email={{email}}" id="upload_stream"></iframe>
 <div id="stream-load">
+    <div class="row" id="stream-sort">
+        <div class="col">
+            <button class="btn btn-outline-secondary active" data-name="timecreated">{{#str}}sortbytimecreated, mod_stream{{/str}}</button>
+            <button class="btn btn-outline-secondary" data-name="title">{{#str}}sortbyname, mod_stream{{/str}}</button>
+            <button class="btn btn-outline-secondary" data-name="views">{{#str}}sortbyview, mod_stream{{/str}}</button>
+            <button class="btn btn-outline-secondary" data-name="filesize">{{#str}}sortbysize, mod_stream{{/str}}</button>
+        </div>
+    </div>
     <div class="row" id="stream-search">
         <div class="col">
             <input type="text" class="form-control" id="stream-title-search" placeholder="{{#str}}search, mod_stream{{/str}}">
