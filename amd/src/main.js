@@ -90,6 +90,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             setTimeout(function () {
                 $('#id_identifier').val(identifier);
                 $('#id_topic').val(topic);
+                $('#id_name').val(topic);
                 $('.list-item-grid').find('.item').removeClass('selected');
                 $('#video_identifier_' + identifier).find('.item').addClass('selected');
             }, 100);
