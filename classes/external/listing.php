@@ -52,6 +52,7 @@ class listing extends \external_api {
         return new external_function_parameters([
                 'term' => new external_value(PARAM_TEXT, 'Search term to filter results.'),
                 'courseid' => new external_value(PARAM_INT, 'the course ID.'),
+                'sort' => new external_value(PARAM_TEXT, 'The field name for resorting the results.'),
         ]);
     }
 
@@ -60,14 +61,16 @@ class listing extends \external_api {
      *
      * @param string $term
      * @param int $courseid
+     * @param string $sort
      * @return array
      * @throws dml_exception
      * @throws invalid_parameter_exception
      */
-    public static function execute($term, $courseid) {
+    public static function execute($term, $courseid, $sort) {
         $params = self::validate_parameters(self::execute_parameters(), [
                 'term' => $term,
                 'courseid' => $courseid,
+                'sort' => $sort,
         ]);
 
         $context = \context_course::instance($params['courseid']);
@@ -76,7 +79,7 @@ class listing extends \external_api {
         require_capability('moodle/course:update', $context);
 
         $helper = new \mod_stream\stream_video();
-        $response = $helper->listing($params['term']);
+        $response = $helper->listing($params['term'], $params['sort']);
 
         return $response;
     }

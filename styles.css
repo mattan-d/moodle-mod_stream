@@ -11,6 +11,11 @@
     border-radius: 6px;
 }
 
+.path-mod-stream #stream-load #stream-sort {
+    margin-bottom: 24px;
+    padding: 15px;
+}
+
 .path-mod-stream #stream-load #stream-search {
     margin-bottom: 24px;
     padding: 15px;
