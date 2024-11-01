@@ -76,7 +76,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
                     'id="video_identifier_' + event.data.streamid + '"><span class="item selected"><div class="thumbnail">' +
                     '<img src="' + event.data.thumbnail + '" class="img-fluid img-rounded">' +
                     '</div><span class="title">' + event.data.topic + '</span></span></div>';
-
                 self.elements.append(html);
             }
         }, load: function() {
@@ -120,12 +119,15 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
 
                         str.get_strings([{'key': 'views', component: 'mod_stream'}, {'key': 'before', component: 'mod_stream'}])
                             .then(function(string) {
-
-                                var html = '<div class="col list-item-grid" data-itemid="' + event.data.streamid + '" ' +
-                                    'id="video_identifier_' + event.data.streamid + '"><span class="item selected">' +
-                                    '<div class="thumbnail"><img src="' + event.data.thumbnail + '" class="img-fluid img-rounded">' +
-                                    '</div><span class="title">' + event.data.topic + '</span></span></div>';
-
+                                var html = '<div class="col list-item-grid" data-itemid="' + video.id + '" ' +
+                                    'id="video_identifier_' + video.id + '">' +
+                                    '<span class="item" ><div class="thumbnail">' +
+                                    '<img src="' + video.thumbnail + '" class="img-fluid img-rounded">' +
+                                    '<span class="datecreated">' + video.datecreated + '</span><span class="duration">' +
+                                    video.duration + '</span></div><span class="title">' + video.title +
+                                    '</span><span class="details">' + video.views + ' ' + string[0] +
+                                    ' <span class="bubble">●</span>' +
+                                    ' ' + string[1] + ' ' + video.elapsed + '</span></span></div>';
                                 self.elements.append(html);
                             });
                     });
