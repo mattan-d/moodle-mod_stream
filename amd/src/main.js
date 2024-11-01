@@ -85,15 +85,18 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/url'], fun
             self.elements.html('<div style="text-align:center"><img height="80" src="' + self.loadingbars + '" ></div>');
 
             ajax.call([{
-                methodname: 'mod_stream_video_list', args: {
-                    term: $('#stream-title-search').val(), courseid: $('input[name="course"]').val(), sort: sort
+                methodname: 'mod_stream_video_list',
+                args: {
+                    term: $('#stream-title-search').val(),
+                    courseid: $('input[name="course"]').val(),
+                    sort: sort
                 }
             }])[0]
                 .then(function(response) {
-                    return self.list(response, self);
+                    return self.list(response, self);  // Ensure a value is returned here.
                 })
                 .catch(function(error) {
-                    return self.failed(error, self);
+                    return self.failed(error, self);   // Catch any error here.
                 });
         }, selected: function(identifier, topic) {
             setTimeout(function() {
