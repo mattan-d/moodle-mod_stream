@@ -239,6 +239,22 @@ class mod_stream_mod_form extends moodleform_mod {
     }
 
     /**
+     * Set default values for the form.
+     * This is called before the form is displayed.
+     *
+     * @param array $default_values
+     */
+    public function set_data($default_values) {
+        // For new instances, set grade to 0 (no grade item) by default.
+        if (empty($default_values->instance)) {
+            if (!isset($default_values->grade)) {
+                $default_values->grade = 0;
+            }
+        }
+        parent::set_data($default_values);
+    }
+
+    /**
      * Add elements to form
      */
     public function data_preprocessing(&$default_values) {
