@@ -1,0 +1,58 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_stream/playlist
+
+    Playlist view for stream videos
+
+    Example context (json):
+    {
+        "cmid": 123,
+        "includeaudio": false,
+        "videos": [
+            { "id": "vid1", "title": "Video 1", "thumbnail": "url/to/thumb1.jpg", "duration": "10:00", "active": true, "viewed": true },
+            { "id": "vid2", "title": "Video 2", "thumbnail": "url/to/thumb2.jpg", "duration": "05:30", "viewed": false }
+        ],
+        "initial_player": "<iframe...>",
+        "show_playlist": true
+    }
+}}
+<div class="stream-playlist-container {{#show_playlist}}with-playlist{{/show_playlist}}{{^show_playlist}}single-video{{/show_playlist}}" data-cmid="{{cmid}}" data-includeaudio="{{includeaudio}}">
+    {{#show_playlist}}
+    <div class="stream-playlist-sidebar">
+        <ul class="list-group">
+            {{#videos}}
+            <li class="list-group-item playlist-item {{#active}}active{{/active}}" data-identifier="{{id}}">
+                <div class="playlist-item-content">
+                    <img class="playlist-thumbnail" src="{{thumbnail}}" alt="{{title}}">
+                    <div class="playlist-item-details">
+                        <div class="playlist-item-title">{{title}}</div>
+                        <div class="playlist-item-duration">{{duration}}</div>
+                    </div>
+                    {{#viewed}}
+                        <span class="badge badge-success playlist-viewed-badge">{{#str}}viewed, mod_stream{{/str}}</span>
+                    {{/viewed}}
+                </div>
+            </li>
+            {{/videos}}
+        </ul>
+    </div>
+    {{/show_playlist}}
+    <div class="stream-main-video">
+        {{{initial_player}}}
+    </div>
+</div>

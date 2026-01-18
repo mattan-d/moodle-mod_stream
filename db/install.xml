@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/stream/db" VERSION="2024050100" COMMENT="XMLDB file for Moodle mod/stream"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+    <TABLES>
+        <TABLE NAME="stream" COMMENT="Default table for Stream">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
+                <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="identifier" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="video_order" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON array storing the order of video identifiers"/>
+                <!-- Added video_names field to store custom names for videos -->
+                <FIELD NAME="video_names" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON object mapping video IDs to custom names"/>
+                <FIELD NAME="collection_mode" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Enable automatic video collection mode"/>
+                <!-- Added includeaudio field to control audio in player -->
+                <FIELD NAME="includeaudio" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Include audio in video player"/>
+                <!-- Added timeopen and timeclose fields for activity access restrictions -->
+                <FIELD NAME="timeopen" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time when the activity becomes available"/>
+                <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time when the activity is no longer available"/>
+                <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
+                <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="100" SEQUENCE="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
+                <INDEX NAME="collection_mode" UNIQUE="false" FIELDS="collection_mode"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="stream_viewed_videos" COMMENT="Tracks which user has viewed which video in a stream instance.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="streamid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="ID from the stream table"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false"/>
+                <FIELD NAME="videoid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The identifier of the video"/>
+                <FIELD NAME="timeviewed" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="streamid" TYPE="foreign" FIELDS="streamid" REFTABLE="stream" REFFIELDS="id"/>
+                <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="stream_user_video" UNIQUE="true" FIELDS="streamid, userid, videoid"/>
+            </INDEXES>
+        </TABLE>
+    </TABLES>
+</XMLDB>
