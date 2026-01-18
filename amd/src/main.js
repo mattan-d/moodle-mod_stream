@@ -626,6 +626,6 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
     });
 
     // Update pagination controls
-    this.updatePagination(totalPages);
+    this.updatePagination(totalPages)
   },
-}));
+}))
