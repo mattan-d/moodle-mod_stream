@@ -1,30 +1,51 @@
-# moodlemodstreamMOODLE4021
+# Stream Moodle Plugin
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+![Stream Logo](https://support.centricapp.co.il/static/centricapp-wordmark-tight.svg)
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/mattan-centricappcs-projects/v0-moodlemodstream-moodle-4021-sm)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/jl1HRxA71iO)
 
-## Overview
+[![Maintained by Mattan Dor (CentricApp)](https://img.shields.io/badge/Maintained%20by-Mattan%20Dor%20(CentricApp)-brightgreen)](https://centricapp.co.il)
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
 
-## Deployment
+Stream is a revolutionary video platform tailored for academic institutions, offering seamless integration into existing systems and unprecedented pedagogical optimization. This Moodle plugin facilitates the incorporation of Stream's powerful features directly into your learning management system, enhancing the educational experience for both instructors and students.
 
-Your project is live at:
+## Features
 
-**[https://vercel.com/mattan-centricappcs-projects/v0-moodlemodstream-moodle-4021-sm](https://vercel.com/mattan-centricappcs-projects/v0-moodlemodstream-moodle-4021-sm)**
+### Simplified Video Management
+- Upload videos manually or import recordings from Zoom, Webex, or Teams effortlessly.
+- Comprehensive video content management through one intuitive interface.
 
-## Build your app
+### Professional Editing and Transcription
+- Professional editing capabilities enable users to create polished videos quickly.
+- Automatic transcription available in 98 languages, enhancing accessibility for all users.
 
-Continue building your app on:
+### User-Friendly Interface
+- Tailored for academic institutions, ensuring seamless navigation for both staff and students.
+- Easy video upload directly to the LMS with just one click.
 
-**[https://v0.app/chat/jl1HRxA71iO](https://v0.app/chat/jl1HRxA71iO)**
+### Comprehensive Pedagogical Experience
+- Manage users, edit recordings, and facilitate collaboration through dedicated channels.
+- Seamless integration with any LMS via the LTI protocol, transforming the platform into a vital educational tool.
 
-## How It Works
+### Customization and Branding
+- Flexible interface customization to align with your institution's branding and layout preferences.
+- Create a digital learning space tailored precisely to your organization's character.
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+### Data-Driven Insights
+- Access shared statistical data and insights for informed decision-making and continuous improvement.
+- Real-time engagement metrics empower staff to design teaching plans based on user interaction.
+
+## Get Started
+To integrate Stream seamlessly into your Moodle platform and explore its full potential, schedule a consultation with our team. We are committed to understanding your organization's unique needs and providing personalized assistance.
+
+For further details and inquiries, feel free to [contact us](https://stream-platform.cloud/en/) via our contact form or email.
+
+Branches
+--------
+The following git branches are supported:
+
+| Moodle version     | Branch            |
+|--------------------|-------------------|
+| Moodle 3.4 to 4.1  | MOODLE_401 |
+| Moodle 4.2         | MOODLE_402 |
+
+**Stream © 2024**
