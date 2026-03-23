@@ -104,6 +104,17 @@ if (trim(strip_tags($stream->intro))) {
     echo $OUTPUT->box(format_module_intro('stream', $stream, $cm->id), 'generalbox', 'intro');
 }
 
+$show_noresults_notification = function(array $requestedidentifiers = []) use ($OUTPUT): void {
+    if (!empty($requestedidentifiers)) {
+        echo $OUTPUT->notification(
+                get_string('noresultswithid', 'stream', implode(', ', $requestedidentifiers)),
+                'notifyinfo'
+        );
+    } else {
+        echo $OUTPUT->notification(get_string('noresults', 'stream'), 'notifyinfo');
+    }
+};
+
 // Check if this is collection mode
 if ($stream->collection_mode) {
     // Handle collection mode
@@ -138,14 +149,14 @@ if ($stream->collection_mode) {
     }
 
     if (empty($videos)) {
-        echo $OUTPUT->notification(get_string('noresults', 'stream'), 'notifyinfo');
+        $show_noresults_notification();
         echo $OUTPUT->footer();
         exit;
     }
 } else {
     // Regular mode - get videos from identifier field
     if (empty($stream->identifier) || trim($stream->identifier) === '') {
-        echo $OUTPUT->notification(get_string('noresults', 'stream'), 'notifyinfo');
+        $show_noresults_notification();
         echo $OUTPUT->footer();
         exit;
     }
@@ -153,7 +164,7 @@ if ($stream->collection_mode) {
     $identifiers = array_values(array_filter(explode(',', $stream->identifier)));
 
     if (empty($identifiers)) {
-        echo $OUTPUT->notification(get_string('noresults', 'stream'), 'notifyinfo');
+        $show_noresults_notification();
         echo $OUTPUT->footer();
         exit;
     }
@@ -162,10 +173,11 @@ if ($stream->collection_mode) {
 
     // Check if we have any videos before proceeding
     if (empty($videos)) {
-        echo $OUTPUT->notification(get_string('noresults', 'stream'), 'notifyinfo');
+        $show_noresults_notification($identifiers);
         echo $OUTPUT->footer();
         exit;
     }
+
 }
 
 // Get viewed videos for the current user.

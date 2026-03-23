@@ -59,6 +59,7 @@ $string['modulename_help'] =
 $string['modulenameplural'] = 'STREAM';
 $string['nametitle'] = 'Title';
 $string['noresults'] = 'No results or videos were found.';
+$string['noresultswithid'] = 'No results or videos were found. Missing video identifier(s): {$a}';
 $string['playlistorder'] = 'Playlist Order';
 $string['playlistorder_help'] = 'Drag and drop videos to change their order in the playlist.';
 $string['pluginadministration'] = 'Stream administration';

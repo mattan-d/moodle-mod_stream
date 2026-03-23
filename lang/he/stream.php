@@ -58,6 +58,7 @@ $string['audioplayer_idnumbers_desc'] = 'הזן מחרוזות זיהוי (אח�
 $string['modulenameplural'] = 'STREAM';
 $string['nametitle'] = 'כותרת';
 $string['noresults'] = 'לא נמצאו תוצאות או סרטונים.';
+$string['noresultswithid'] = 'לא נמצאו תוצאות או סרטונים. מזהה/י וידאו שלא נמצאו: {$a}';
 $string['pluginadministration'] = 'ניהול Stream';
 $string['pluginname'] = 'STREAM';
 $string['privacy:metadata'] =
