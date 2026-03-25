@@ -196,6 +196,16 @@ class mod_stream_mod_form extends moodleform_mod {
         $mform->addHelpButton('timeclose', 'timeclose', 'stream');
 
         $this->standard_grading_coursemodule_elements();
+
+        // New activity: default grade type to "None" (core sets points from $CFG->gradepointdefault otherwise).
+        if (empty($this->_cm)) {
+            $gradefieldname = \core_grades\component_gradeitems::get_field_name_for_itemnumber('mod_stream', 0, 'grade');
+            if ($mform->elementExists($gradefieldname)) {
+                $gradeelement = $mform->getElement($gradefieldname);
+                $mform->setDefault($gradeelement->getName() . '[modgrade_type]', 'none');
+            }
+        }
+
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
     }
