@@ -27,6 +27,13 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir . '/resourcelib.php');
 require_once(__DIR__ . '/locallib.php');
 
+$ADMIN->add('modsettings', new admin_externalpage(
+        'modstreamdeletegradeitems',
+        get_string('deletegradeitems', 'mod_stream'),
+        new moodle_url('/mod/stream/admin/delete_grade_items.php'),
+        'moodle/site:config'
+));
+
 if ($ADMIN->fulltree) {
 
     if (get_config('stream', 'accountid')) {
@@ -67,4 +74,10 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('stream/defaultincludeaudio',
             get_string('defaultincludeaudio', 'mod_stream'),
             get_string('defaultincludeaudio_desc', 'mod_stream'), 0));
+
+    $toolurl = new moodle_url('/mod/stream/admin/delete_grade_items.php');
+    $settings->add(new admin_setting_heading('stream/tools',
+            get_string('tools', 'mod_stream'),
+            get_string('tools_desc', 'mod_stream') . '<br>' .
+            html_writer::link($toolurl, get_string('deletegradeitems_link', 'mod_stream'))));
 }

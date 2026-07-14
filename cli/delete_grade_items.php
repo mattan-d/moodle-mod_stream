@@ -21,6 +21,7 @@
  * 1. Find all Stream activities (optionally in a specific course)
  * 2. Delete grade items associated with those activities
  * 3. Reset the grade field to 0 in the stream table
+ * 4. Recalculate gradebooks for affected courses
  *
  * @package    mod_stream
  * @copyright  2024 mattandor <mattan@centricapp.co.il>
@@ -32,8 +33,8 @@ define('CLI_SCRIPT', true);
 require(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/clilib.php');
 require_once($CFG->libdir . '/adminlib.php');
-require_once($CFG->libdir . '/gradelib.php');
-require_once($CFG->dirroot . '/mod/stream/lib.php');
+
+use mod_stream\local\grade_items_cleaner;
 
 // Get CLI options.
 list($options, $unrecognized) = cli_get_params(
@@ -82,80 +83,6 @@ Example:
 // Ensure we are running as admin.
 \core\session\manager::set_user(get_admin());
 
-/**
- * Get Stream activities that have grade items.
- *
- * @param int|null $courseid Optional course ID to filter by
- * @return array Array of stream records with grade items
- */
-function get_stream_activities_with_grades($courseid = null) {
-    global $DB;
-
-    $params = [];
-    $where = "s.grade <> 0";
-
-    if ($courseid) {
-        $where .= " AND s.course = :courseid";
-        $params['courseid'] = $courseid;
-    }
-
-    $sql = "SELECT s.*, c.shortname as coursename, c.fullname as coursefullname
-            FROM {stream} s
-            JOIN {course} c ON c.id = s.course
-            WHERE $where
-            ORDER BY c.shortname, s.name";
-
-    return $DB->get_records_sql($sql, $params);
-}
-
-/**
- * Delete grade item for a Stream activity.
- *
- * @param object $stream The stream activity
- * @param bool $dryrun Whether this is a dry run
- * @param bool $verbose Whether to show verbose output
- * @return bool True if successful
- */
-function delete_stream_grade_item($stream, $dryrun = false, $verbose = false) {
-    global $DB;
-
-    // Check if grade item exists.
-    $gradeitem = grade_item::fetch([
-        'itemtype' => 'mod',
-        'itemmodule' => 'stream',
-        'iteminstance' => $stream->id,
-        'courseid' => $stream->course,
-    ]);
-
-    if (!$gradeitem) {
-        if ($verbose) {
-            cli_writeln("    No grade item found for this activity.");
-        }
-        return false;
-    }
-
-    if ($dryrun) {
-        if ($verbose) {
-            cli_writeln("    Would delete grade item ID: {$gradeitem->id}");
-            cli_writeln("    Would reset stream grade field to 0");
-        }
-        return true;
-    }
-
-    // Delete the grade item.
-    $gradeitem->delete('mod/stream');
-
-    // Reset the grade field in the stream table.
-    $DB->set_field('stream', 'grade', 0, ['id' => $stream->id]);
-
-    if ($verbose) {
-        cli_writeln("    Deleted grade item ID: {$gradeitem->id}");
-        cli_writeln("    Reset stream grade field to 0");
-    }
-
-    return true;
-}
-
 // Main execution.
 cli_heading('Stream Grade Items Deletion Tool');
 
@@ -180,49 +107,42 @@ if ($courseid) {
 }
 cli_writeln('');
 
-// Get stream activities with grades.
 cli_writeln('Finding Stream activities with grade items...');
-$streams = get_stream_activities_with_grades($courseid);
+$summary = grade_items_cleaner::process($courseid, $dryrun);
 
-if (empty($streams)) {
+if ($summary['processed'] === 0) {
     cli_writeln('No Stream activities with grade items found.');
     exit(0);
 }
 
-cli_writeln('Found ' . count($streams) . ' Stream activities with grade items.');
+cli_writeln('Found ' . $summary['processed'] . ' Stream activities with grade items.');
 cli_writeln('');
 
-$totalprocessed = 0;
-$totaldeleted = 0;
-$totalfailed = 0;
-
-foreach ($streams as $stream) {
+foreach ($summary['results'] as $entry) {
+    $stream = $entry['stream'];
     cli_writeln("Processing: {$stream->name} (ID: {$stream->id})");
     cli_writeln("  Course: {$stream->coursename} ({$stream->coursefullname})");
     cli_writeln("  Current grade setting: {$stream->grade}");
 
-    try {
-        $result = delete_stream_grade_item($stream, $dryrun, $verbose);
-
-        if ($result) {
-            $totaldeleted++;
-            if ($dryrun) {
-                cli_writeln("  [DRY RUN] Would delete grade item");
-            } else {
-                cli_writeln("  Successfully deleted grade item");
-            }
-        } else {
-            cli_writeln("  Skipped - no grade item found");
-        }
-
-        $totalprocessed++;
-
-    } catch (Exception $e) {
-        cli_writeln("  ERROR: " . $e->getMessage());
+    if (!empty($entry['error'])) {
+        cli_writeln("  ERROR: " . $entry['error']);
+    } else if ($entry['skipped']) {
+        cli_writeln("  Skipped - no grade item found");
         if ($verbose) {
-            cli_writeln("    " . $e->getTraceAsString());
+            cli_writeln("    No grade item found for this activity.");
         }
-        $totalfailed++;
+    } else if ($dryrun) {
+        cli_writeln("  [DRY RUN] Would delete grade item");
+        if ($verbose) {
+            cli_writeln("    Would delete grade item ID: {$entry['gradeitemid']}");
+            cli_writeln("    Would reset stream grade field to 0");
+        }
+    } else {
+        cli_writeln("  Successfully deleted grade item");
+        if ($verbose) {
+            cli_writeln("    Deleted grade item ID: {$entry['gradeitemid']}");
+            cli_writeln("    Reset stream grade field to 0");
+        }
     }
 
     cli_writeln('');
@@ -230,16 +150,36 @@ foreach ($streams as $stream) {
 
 // Summary.
 cli_writeln('=== Summary ===');
-cli_writeln("Activities processed: {$totalprocessed}");
-cli_writeln("Grade items deleted: {$totaldeleted}");
-if ($totalfailed > 0) {
-    cli_writeln("Failed: {$totalfailed}");
+cli_writeln("Activities processed: {$summary['processed']}");
+cli_writeln("Grade items deleted: {$summary['deleted']}");
+if ($summary['failed'] > 0) {
+    cli_writeln("Failed: {$summary['failed']}");
 }
 
 if ($dryrun) {
     cli_writeln('');
     cli_writeln('This was a dry run. To perform the actual deletion, run the script without --dry-run');
 } else {
+    if ($summary['deleted'] > 0) {
+        cli_writeln('');
+        cli_writeln('=== Gradebook recalculation ===');
+        cli_writeln("Courses regraded successfully: {$summary['regrade_success']}");
+        if ($summary['regrade_failed'] > 0) {
+            cli_writeln("Courses failed to regrade: {$summary['regrade_failed']}");
+            foreach ($summary['regraded'] as $regrade) {
+                if (!$regrade['success']) {
+                    cli_writeln("  Course {$regrade['courseid']}: {$regrade['error']}");
+                } else if ($verbose) {
+                    cli_writeln("  Course {$regrade['courseid']}: regraded");
+                }
+            }
+        } else if ($verbose) {
+            foreach ($summary['regraded'] as $regrade) {
+                cli_writeln("  Course {$regrade['courseid']}: regraded");
+            }
+        }
+    }
+
     cli_writeln('');
     cli_writeln('Grade items deletion completed!');
 }
