@@ -156,6 +156,46 @@ function stream_get_coursemodule_info($cm) {
 }
 
 /**
+ * Mark a video as viewed for a user in a stream activity.
+ *
+ * @param object $stream The stream activity object.
+ * @param int $userid The user ID.
+ * @param string $videoid The video identifier.
+ * @param bool $updategrades Whether to recalculate grades after marking.
+ * @return bool True if a new view record was inserted.
+ */
+function stream_mark_video_as_viewed($stream, $userid, $videoid, $updategrades = true) {
+    global $DB;
+
+    if (empty($stream->id) || empty($userid) || $videoid === '' || $videoid === null) {
+        return false;
+    }
+
+    $exists = $DB->record_exists('stream_viewed_videos', [
+        'streamid' => $stream->id,
+        'userid' => $userid,
+        'videoid' => $videoid,
+    ]);
+
+    if ($exists) {
+        return false;
+    }
+
+    $newrecord = new stdClass();
+    $newrecord->streamid = $stream->id;
+    $newrecord->userid = $userid;
+    $newrecord->videoid = $videoid;
+    $newrecord->timeviewed = time();
+    $DB->insert_record('stream_viewed_videos', $newrecord);
+
+    if ($updategrades) {
+        stream_update_grades($stream, $userid);
+    }
+
+    return true;
+}
+
+/**
 * Update the grade for a user in a stream activity.
 *
 * @param object $stream The stream activity object.

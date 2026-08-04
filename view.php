@@ -240,9 +240,12 @@ if (!$stream->collection_mode && !empty($stream->video_order)) {
 // Determine if we should show the playlist sidebar (only show if more than 1 video)
 $show_playlist = count($videos) > 1;
 
-// Generate initial player HTML for the first video
+// Mark the initially displayed video as viewed (playlist clicks only track on switch).
 $initial_player = '';
 if (!empty($videos)) {
+    stream_mark_video_as_viewed($stream, $USER->id, $videos[0]->id, false);
+    $videos[0]->viewed = true;
+
     $helper = new \mod_stream\stream_video();
     $initial_player = $helper->player($cm->id, $videos[0]->id, $includeaudio);
 }

@@ -58,25 +58,7 @@ class tracker extends external_api {
         //require_capability('mod/stream:view', $context);
 
         $stream = $DB->get_record('stream', ['id' => $cm->instance], '*', MUST_EXIST);
-
-        // Check if already viewed.
-        $record = $DB->get_record('stream_viewed_videos', [
-            'streamid' => $stream->id,
-            'userid' => $USER->id,
-            'videoid' => $params['videoid'],
-        ]);
-
-        if (!$record) {
-            $newrecord = new \stdClass();
-            $newrecord->streamid = $stream->id;
-            $newrecord->userid = $USER->id;
-            $newrecord->videoid = $params['videoid'];
-            $newrecord->timeviewed = time();
-            $DB->insert_record('stream_viewed_videos', $newrecord);
-
-            // Update grade.
-            stream_update_grades($stream, $USER->id);
-        }
+        stream_mark_video_as_viewed($stream, $USER->id, $params['videoid']);
 
         return ['status' => 'ok'];
     }
