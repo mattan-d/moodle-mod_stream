@@ -96,6 +96,13 @@ class mod_stream_mod_form extends moodleform_mod {
         $mform->addHelpButton('includeaudio', 'includeaudio', 'stream');
         $mform->setDefault('includeaudio', $includeaudio_default);
 
+        $defaultautoplaynext = get_config('stream', 'defaultautoplaynext');
+        $autoplaynext_default = ($defaultautoplaynext !== false) ? (int) $defaultautoplaynext : 1;
+        $mform->addElement('advcheckbox', 'autoplaynext', get_string('autoplaynext', 'stream'),
+                get_string('autoplaynext_desc', 'stream'));
+        $mform->addHelpButton('autoplaynext', 'autoplaynext', 'stream');
+        $mform->setDefault('autoplaynext', $autoplaynext_default);
+
         $mform->addElement('hidden', 'identifier');
         $mform->setType('identifier', PARAM_TEXT);
         $mform->addRule('identifier', null, 'required', null, 'client');
@@ -119,6 +126,9 @@ class mod_stream_mod_form extends moodleform_mod {
 
                 // Set default for includeaudio
                 $mform->setDefault('includeaudio', $stream->includeaudio ?? 0);
+
+                // Set default for autoplaynext
+                $mform->setDefault('autoplaynext', $stream->autoplaynext ?? 1);
 
                 // Set default for video_order
                 if (!empty($stream->video_order)) {
@@ -144,6 +154,7 @@ class mod_stream_mod_form extends moodleform_mod {
             $mform->setDefault('video_order', '[]');
             $mform->setDefault('video_names', '{}');
             $mform->setDefault('includeaudio', 0);
+            $mform->setDefault('autoplaynext', $autoplaynext_default);
         }
 
         $this->standard_intro_elements();
@@ -296,6 +307,12 @@ class mod_stream_mod_form extends moodleform_mod {
             $default_values['includeaudio'] = (int)$default_values['includeaudio'];
         } else {
             $default_values['includeaudio'] = 0;
+        }
+
+        if (isset($default_values['autoplaynext'])) {
+            $default_values['autoplaynext'] = (int) $default_values['autoplaynext'];
+        } else {
+            $default_values['autoplaynext'] = 1;
         }
     }
 }

@@ -170,5 +170,16 @@ function xmldb_stream_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2025123100, 'stream');
     }
 
+    if ($oldversion < 2026082000) {
+        $table = new xmldb_table('stream');
+        $field = new xmldb_field('autoplaynext', XMLDB_TYPE_INTEGER, '1', true, XMLDB_NOTNULL, null, '1', 'includeaudio');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2026082000, 'stream');
+    }
+
     return true;
 }

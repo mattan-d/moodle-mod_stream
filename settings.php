@@ -75,6 +75,10 @@ if ($ADMIN->fulltree) {
             get_string('defaultincludeaudio', 'mod_stream'),
             get_string('defaultincludeaudio_desc', 'mod_stream'), 0));
 
+    $settings->add(new admin_setting_configcheckbox('stream/defaultautoplaynext',
+            get_string('defaultautoplaynext', 'mod_stream'),
+            get_string('defaultautoplaynext_desc', 'mod_stream'), 1));
+
     $toolurl = new moodle_url('/mod/stream/admin/delete_grade_items.php');
     $settings->add(new admin_setting_heading('stream/tools',
             get_string('tools', 'mod_stream'),

@@ -15,6 +15,7 @@
                 <FIELD NAME="collection_mode" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Enable automatic video collection mode"/>
                 <!-- Added includeaudio field to control audio in player -->
                 <FIELD NAME="includeaudio" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Include audio in video player"/>
+                <FIELD NAME="autoplaynext" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" COMMENT="Automatically play the next playlist video when the current one ends"/>
                 <!-- Added timeopen and timeclose fields for activity access restrictions -->
                 <FIELD NAME="timeopen" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time when the activity becomes available"/>
                 <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time when the activity is no longer available"/>
