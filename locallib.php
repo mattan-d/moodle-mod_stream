@@ -103,11 +103,12 @@ class stream_video {
      * @param int $cmid
      * @param string $identifier
      * @param boolean $includeaudio
+     * @param boolean $autoplay Whether the player should start automatically.
      *
      * @return string
      * @throws \dml_exception
      */
-    public static function player($cmid, $identifier, $includeaudio = false) {
+    public static function player($cmid, $identifier, $includeaudio = false, $autoplay = false) {
         global $USER;
 
         $config = get_config('stream');
@@ -121,14 +122,19 @@ class stream_video {
         $token = jwt_helper::encode($config->accountid, $payload, HOURSECS);
 
         $html = '';
+        $query = 'token=' . urlencode($token);
+        if ($autoplay) {
+            $query .= '&autoplay=1';
+        }
+        $allow = $autoplay ? "allow='autoplay; fullscreen; encrypted-media'" : "allow='fullscreen; encrypted-media'";
 
         if ($includeaudio) {
             $html .= "<div class='stream-background'><iframe width='960px' style='height: 150px !important;' height='100px' frameborder='0' " .
-                    "allowfullscreen src='{$config->apiendpoint}/embed-audio/{$identifier}?token={$token}'></iframe></div>";
+                    "allowfullscreen {$allow} src='{$config->apiendpoint}/embed-audio/{$identifier}?{$query}'></iframe></div>";
         }
 
         $html .= "<div class='stream-background'><iframe width='960px' height='540px' frameborder='0' " .
-                "allowfullscreen src='{$config->apiendpoint}/embed/{$identifier}?token={$token}'></iframe></div>";
+                "allowfullscreen {$allow} src='{$config->apiendpoint}/embed/{$identifier}?{$query}'></iframe></div>";
 
         return $html;
     }

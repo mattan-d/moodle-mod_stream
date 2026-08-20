@@ -253,6 +253,7 @@ if (!empty($videos)) {
 $template_data = [
         'cmid' => $cm->id,
         'includeaudio' => $includeaudio,
+        'autoplaynext' => !empty($stream->autoplaynext) ? 1 : 0,
         'videos' => $videos,
         'initial_player' => $initial_player,
         'show_playlist' => $show_playlist,
