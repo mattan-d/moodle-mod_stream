@@ -10,6 +10,44 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
     };
 
     /**
+     * Normalize postMessage payloads (object or JSON string).
+     *
+     * @param {*} raw
+     * @return {Object|null}
+     */
+    var normalizeMessageData = function(raw) {
+        if (!raw) {
+            return null;
+        }
+        if (typeof raw === 'string') {
+            try {
+                raw = JSON.parse(raw);
+            } catch (e) {
+                return null;
+            }
+        }
+        if (typeof raw !== 'object') {
+            return null;
+        }
+        return raw;
+    };
+
+    /**
+     * Whether playlist autoplay-next is enabled on a container.
+     *
+     * @param {jQuery} container
+     * @return {boolean}
+     */
+    var isAutoplayNextEnabled = function(container) {
+        // Prefer attribute over jQuery.data() cache to avoid stale/typed values.
+        var attr = container.attr('data-autoplaynext');
+        if (typeof attr !== 'undefined' && attr !== null && attr !== '') {
+            return attr === '1' || attr === 'true' || attr === true;
+        }
+        return !!Number(container.data('autoplaynext'));
+    };
+
+    /**
      * Load a playlist item into the main player.
      *
      * @param {jQuery} playlistItem
@@ -81,7 +119,7 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
     var playNextFromEnded = function(sourceWindow) {
         $('.stream-playlist-container').each(function() {
             var container = $(this);
-            if (!Number(container.data('autoplaynext'))) {
+            if (!isAutoplayNextEnabled(container)) {
                 return;
             }
 
@@ -92,18 +130,23 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
 
             if (sourceWindow) {
                 var ownsSource = false;
+                var hasVideoIframe = false;
                 container.find('iframe').each(function() {
                     var src = this.getAttribute('src') || '';
                     // Ignore the optional audio iframe; only the video embed advances the playlist.
                     if (src.indexOf('/embed-audio/') !== -1) {
                         return;
                     }
+                    hasVideoIframe = true;
                     if (this.contentWindow === sourceWindow) {
                         ownsSource = true;
                         return false;
                     }
                 });
-                if (!ownsSource) {
+                // If we have iframes but none matched, skip this container.
+                // If the page has a single playlist container, still advance as a fallback
+                // (some browsers may not preserve a stable source Window reference).
+                if (hasVideoIframe && !ownsSource && $('.stream-playlist-container').length > 1) {
                     return;
                 }
             }
@@ -129,14 +172,14 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             });
 
             window.addEventListener('message', function(event) {
-                var data = event.data;
+                var data = normalizeMessageData(event.data);
                 if (!data || data.context !== 'stream') {
                     return;
                 }
                 if (!ENDED_ACTIONS[data.action]) {
                     return;
                 }
-                playNextFromEnded(event.source);
+                playNextFromEnded(event.source || null);
             });
         }
     };
