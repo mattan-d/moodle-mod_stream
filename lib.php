@@ -164,6 +164,36 @@ function stream_get_coursemodule_info($cm) {
 }
 
 /**
+ * Convert a Stream duration value to seconds.
+ *
+ * Accepts seconds (int/numeric string) or clock formats like "05:30" / "1:05:30".
+ *
+ * @param mixed $duration
+ * @return int
+ */
+function stream_duration_to_seconds($duration) {
+    if ($duration === null || $duration === '') {
+        return 0;
+    }
+    if (is_numeric($duration)) {
+        return max(0, (int) $duration);
+    }
+
+    $duration = trim((string) $duration);
+    if ($duration === '' || !preg_match('/^\d{1,2}(:\d{1,2}){0,2}$/', $duration)) {
+        return 0;
+    }
+
+    $parts = array_map('intval', explode(':', $duration));
+    $parts = array_reverse($parts);
+    $seconds = $parts[0] ?? 0;
+    $seconds += ($parts[1] ?? 0) * 60;
+    $seconds += ($parts[2] ?? 0) * 3600;
+
+    return max(0, $seconds);
+}
+
+/**
  * Mark a video as viewed for a user in a stream activity.
  *
  * @param object $stream The stream activity object.

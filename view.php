@@ -201,6 +201,7 @@ if (!empty($stream->video_names)) {
 
 foreach ($videos as $video) {
     $video->viewed = in_array($video->id, $viewedvideoids);
+    $video->durationseconds = stream_duration_to_seconds($video->duration ?? 0);
     if (isset($customVideoNames[$video->id]) && !empty($customVideoNames[$video->id])) {
         $video->custom_title = $customVideoNames[$video->id];
         $video->original_title = $video->title;

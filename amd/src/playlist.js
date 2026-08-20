@@ -9,6 +9,9 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
         playbackEnded: true
     };
 
+    var autoplayTimer = null;
+    var autoplayToken = 0;
+
     /**
      * Normalize postMessage payloads (object or JSON string).
      *
@@ -39,12 +42,110 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
      * @return {boolean}
      */
     var isAutoplayNextEnabled = function(container) {
-        // Prefer attribute over jQuery.data() cache to avoid stale/typed values.
         var attr = container.attr('data-autoplaynext');
         if (typeof attr !== 'undefined' && attr !== null && attr !== '') {
             return attr === '1' || attr === 'true' || attr === true;
         }
         return !!Number(container.data('autoplaynext'));
+    };
+
+    /**
+     * Parse a clock duration (MM:SS / HH:MM:SS) or seconds into seconds.
+     *
+     * @param {*} value
+     * @return {number}
+     */
+    var parseDurationSeconds = function(value) {
+        if (value === null || typeof value === 'undefined' || value === '') {
+            return 0;
+        }
+        if (typeof value === 'number' && !isNaN(value)) {
+            return Math.max(0, Math.floor(value));
+        }
+        var text = String(value).trim();
+        if (/^\d+$/.test(text)) {
+            return Math.max(0, parseInt(text, 10));
+        }
+        var parts = text.split(':');
+        if (!parts.length || parts.length > 3) {
+            return 0;
+        }
+        var seconds = 0;
+        var multiplier = 1;
+        for (var i = parts.length - 1; i >= 0; i--) {
+            var part = parseInt(parts[i], 10);
+            if (isNaN(part)) {
+                return 0;
+            }
+            seconds += part * multiplier;
+            multiplier *= 60;
+        }
+        return Math.max(0, seconds);
+    };
+
+    /**
+     * Resolve duration in seconds for a playlist item.
+     *
+     * @param {jQuery} playlistItem
+     * @return {number}
+     */
+    var getItemDurationSeconds = function(playlistItem) {
+        var fromAttr = playlistItem.attr('data-duration-seconds');
+        var seconds = parseDurationSeconds(fromAttr);
+        if (seconds > 0) {
+            return seconds;
+        }
+        return parseDurationSeconds(playlistItem.find('.playlist-item-duration').first().text());
+    };
+
+    /**
+     * Cancel any pending autoplay-next timer.
+     */
+    var clearAutoplayTimer = function() {
+        if (autoplayTimer) {
+            window.clearTimeout(autoplayTimer);
+            autoplayTimer = null;
+        }
+        autoplayToken += 1;
+    };
+
+    /**
+     * Schedule advancing to the next item after the current video duration.
+     * Used when the Stream embed cannot notify Moodle that playback ended.
+     *
+     * @param {jQuery} playlistItem
+     * @param {jQuery} container
+     */
+    var scheduleAutoplayNext = function(playlistItem, container) {
+        clearAutoplayTimer();
+
+        if (!isAutoplayNextEnabled(container)) {
+            return;
+        }
+
+        var durationSeconds = getItemDurationSeconds(playlistItem);
+        if (durationSeconds <= 0) {
+            return;
+        }
+
+        var next = playlistItem.nextAll('.playlist-item').first();
+        if (!next.length) {
+            return;
+        }
+
+        // Small buffer so we don't cut off the last second of playback.
+        var delayMs = (durationSeconds + 1) * 1000;
+        var token = autoplayToken;
+
+        autoplayTimer = window.setTimeout(function() {
+            if (token !== autoplayToken) {
+                return;
+            }
+            if (!playlistItem.hasClass('active')) {
+                return;
+            }
+            loadPlaylistItem(next, true);
+        }, delayMs);
     };
 
     /**
@@ -60,6 +161,8 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
         if (playlistItem.hasClass('active') && !autoplay) {
             return;
         }
+
+        clearAutoplayTimer();
 
         var identifier = playlistItem.data('identifier');
         var cmid = container.data('cmid');
@@ -106,6 +209,7 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
                     // Ignore cross-origin timing errors before the iframe loads.
                 }
             });
+            scheduleAutoplayNext(playlistItem, container);
         }).fail(function() {
             mainVideoContainer.html('<div class="alert alert-danger">Failed to load video.</div>');
         });
@@ -133,7 +237,6 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
                 var hasVideoIframe = false;
                 container.find('iframe').each(function() {
                     var src = this.getAttribute('src') || '';
-                    // Ignore the optional audio iframe; only the video embed advances the playlist.
                     if (src.indexOf('/embed-audio/') !== -1) {
                         return;
                     }
@@ -143,9 +246,6 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
                         return false;
                     }
                 });
-                // If we have iframes but none matched, skip this container.
-                // If the page has a single playlist container, still advance as a fallback
-                // (some browsers may not preserve a stable source Window reference).
                 if (hasVideoIframe && !ownsSource && $('.stream-playlist-container').length > 1) {
                     return;
                 }
@@ -161,6 +261,7 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
                 return;
             }
 
+            clearAutoplayTimer();
             loadPlaylistItem(next, true);
         });
     };
@@ -171,6 +272,19 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
                 loadPlaylistItem($(this), false);
             });
 
+            // Duration-based fallback (works without Stream player updates).
+            $('.stream-playlist-container').each(function() {
+                var container = $(this);
+                if (!isAutoplayNextEnabled(container)) {
+                    return;
+                }
+                var active = container.find('.playlist-item.active').first();
+                if (active.length) {
+                    scheduleAutoplayNext(active, container);
+                }
+            });
+
+            // Optional fast-path if the Stream embed later starts sending ended events.
             window.addEventListener('message', function(event) {
                 var data = normalizeMessageData(event.data);
                 if (!data || data.context !== 'stream') {

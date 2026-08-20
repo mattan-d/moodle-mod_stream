@@ -36,7 +36,7 @@
     <div class="stream-playlist-sidebar">
         <ul class="list-group">
             {{#videos}}
-            <li class="list-group-item playlist-item {{#active}}active{{/active}}" data-identifier="{{id}}">
+            <li class="list-group-item playlist-item {{#active}}active{{/active}}" data-identifier="{{id}}" data-duration-seconds="{{durationseconds}}">
                 <div class="playlist-item-content">
                     <img class="playlist-thumbnail" src="{{thumbnail}}" alt="{{title}}">
                     <div class="playlist-item-details">
