@@ -93,6 +93,11 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             if (sourceWindow) {
                 var ownsSource = false;
                 container.find('iframe').each(function() {
+                    var src = this.getAttribute('src') || '';
+                    // Ignore the optional audio iframe; only the video embed advances the playlist.
+                    if (src.indexOf('/embed-audio/') !== -1) {
+                        return;
+                    }
                     if (this.contentWindow === sourceWindow) {
                         ownsSource = true;
                         return false;

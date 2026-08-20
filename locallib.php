@@ -133,8 +133,10 @@ class stream_video {
                     "allowfullscreen {$allow} src='{$config->apiendpoint}/embed-audio/{$identifier}?{$query}'></iframe></div>";
         }
 
+        // Always allow autoplay on the video iframe so sequential playlist playback is not blocked.
+        $videoallow = "allow='autoplay; fullscreen; encrypted-media'";
         $html .= "<div class='stream-background'><iframe width='960px' height='540px' frameborder='0' " .
-                "allowfullscreen {$allow} src='{$config->apiendpoint}/embed/{$identifier}?{$query}'></iframe></div>";
+                "allowfullscreen {$videoallow} src='{$config->apiendpoint}/embed/{$identifier}?{$query}'></iframe></div>";
 
         return $html;
     }
