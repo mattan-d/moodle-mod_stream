@@ -2,11 +2,10 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
     'use strict';
 
     /**
-     * Playlist autoplay using only Moodle-side duration timing.
-     * Uses the original Stream iframe embed (no postMessage, no native video).
+     * Playlist autoplay for the original Stream iframe embed.
      *
-     * Timer starts when the learner engages the player (click into iframe),
-     * or immediately after an auto-advanced load with autoplay=1.
+     * Primary: postMessage from VideoTube {context:'stream', action:'ended'}.
+     * Fallback: duration timer after the learner engages the player.
      */
 
     var config = {
@@ -22,6 +21,11 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
         deadline: 0,
         paused: false,
         armedForId: null,
+        playlistItem: null,
+        container: null
+    };
+
+    var activeContext = {
         playlistItem: null,
         container: null
     };
@@ -276,6 +280,9 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
      * @param {boolean} autoplay
      */
     var setupPlayerTiming = function(mainVideoContainer, playlistItem, container, autoplay) {
+        activeContext.playlistItem = playlistItem;
+        activeContext.container = container;
+
         if (!isAutoplayNextEnabled(container)) {
             return;
         }
@@ -300,6 +307,24 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
 
         // First / manually selected video: wait until the user engages the player.
         bindIframeEngagement(mainVideoContainer, playlistItem, container);
+    };
+
+    /**
+     * @param {MessageEvent} event
+     */
+    var onStreamMessage = function(event) {
+        var data = event.data;
+        if (!data || typeof data !== 'object') {
+            return;
+        }
+        if (data.context !== 'stream' || data.action !== 'ended') {
+            return;
+        }
+        if (!activeContext.playlistItem || !activeContext.container) {
+            return;
+        }
+        clearAutoplayTimer();
+        playNextItem(activeContext.playlistItem, activeContext.container);
     };
 
     /**
@@ -375,6 +400,8 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             $('.playlist-item').on('click', function() {
                 loadPlaylistItem($(this), false);
             });
+
+            window.addEventListener('message', onStreamMessage);
 
             document.addEventListener('visibilitychange', function() {
                 if (document.hidden) {
