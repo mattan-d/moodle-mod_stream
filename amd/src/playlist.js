@@ -263,8 +263,8 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
         };
 
         $(window).off('blur.streamAutoplay').on('blur.streamAutoplay', tryArmFromEngagement);
-        iframe.off('pointerenter.streamAutoplay').on('pointerenter.streamAutoplay', function() {
-            // Some browsers do not move focus into the iframe immediately.
+        // focusin bubbles when the iframe receives focus (more reliable than blur alone).
+        mainVideoContainer.off('focusin.streamAutoplay').on('focusin.streamAutoplay', function() {
             armAutoplayTimer(playlistItem, container);
         });
     };
