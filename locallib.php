@@ -124,14 +124,15 @@ class stream_video {
         $html = '';
         $query = 'token=' . urlencode($token);
         if ($autoplay) {
-            // Multiple param names for compatibility with older Stream/VideoTube embeds.
-            $query .= '&autoplay=1&autoPlay=1&auto_play=1';
+            // Compatible with Stream/VideoTube embeds that read autoplay from the URL.
+            $query .= '&autoplay=1';
         }
         $videoallow = "allow='autoplay; fullscreen; encrypted-media; picture-in-picture'";
 
         if ($includeaudio) {
             $html .= "<div class='stream-background'><iframe width='960px' style='height: 150px !important;' height='100px' frameborder='0' " .
-                    "allowfullscreen allow='autoplay; fullscreen; encrypted-media' src='{$config->apiendpoint}/embed-audio/{$identifier}?{$query}'></iframe></div>";
+                    "allowfullscreen allow='autoplay; fullscreen; encrypted-media' " .
+                    "src='{$config->apiendpoint}/embed-audio/{$identifier}?token=" . urlencode($token) . "'></iframe></div>";
         }
 
         $html .= "<div class='stream-background'><iframe class='stream-video-iframe' width='960px' height='540px' frameborder='0' " .

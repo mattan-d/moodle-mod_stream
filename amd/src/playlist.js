@@ -2,10 +2,10 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
     'use strict';
 
     /**
-     * Moodle-only playlist autoplay.
+     * Playlist autoplay with the original Stream embed iframe.
      *
-     * Does not depend on VideoTube/Stream postMessage events. Advances by the
-     * known video duration from the playlist metadata after the iframe loads.
+     * Primary: postMessage from VideoTube ({context:'stream', action:'ended'}).
+     * Fallback: duration timer from playlist metadata.
      */
 
     var timerState = {
@@ -14,6 +14,11 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
         remainingMs: 0,
         deadline: 0,
         paused: false,
+        playlistItem: null,
+        container: null
+    };
+
+    var activeContext = {
         playlistItem: null,
         container: null
     };
@@ -95,6 +100,27 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
      * @param {jQuery} playlistItem
      * @param {jQuery} container
      */
+    var playNextItem = function(playlistItem, container) {
+        if (!playlistItem || !container || !container.length) {
+            return;
+        }
+        if (!isAutoplayNextEnabled(container)) {
+            return;
+        }
+        if (!playlistItem.hasClass('active')) {
+            return;
+        }
+        var next = playlistItem.nextAll('.playlist-item').first();
+        if (!next.length) {
+            return;
+        }
+        loadPlaylistItem(next, true);
+    };
+
+    /**
+     * @param {jQuery} playlistItem
+     * @param {jQuery} container
+     */
     var armAutoplayTimer = function(playlistItem, container) {
         if (!isAutoplayNextEnabled(container)) {
             return;
@@ -110,7 +136,7 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             return;
         }
 
-        // +1s buffer so the last second is not cut off.
+        // +1s buffer so the last second is not cut off if postMessage never arrives.
         startCountdown(playlistItem, container, (durationSeconds + 1) * 1000);
     };
 
@@ -137,14 +163,7 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             if (token !== timerState.token) {
                 return;
             }
-            if (!playlistItem.hasClass('active')) {
-                return;
-            }
-            var next = playlistItem.nextAll('.playlist-item').first();
-            if (!next.length) {
-                return;
-            }
-            loadPlaylistItem(next, true);
+            playNextItem(playlistItem, container);
         }, delayMs);
     };
 
@@ -174,6 +193,9 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
      * @param {jQuery} container
      */
     var bindIframeLoadThenArm = function(mainVideoContainer, playlistItem, container) {
+        activeContext.playlistItem = playlistItem;
+        activeContext.container = container;
+
         var iframe = mainVideoContainer.find('iframe.stream-video-iframe').first();
         if (!iframe.length) {
             iframe = mainVideoContainer.find('iframe').filter(function() {
@@ -202,6 +224,26 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
 
         // Fallback if load already fired or never fires.
         window.setTimeout(arm, 1500);
+    };
+
+    /**
+     * @param {MessageEvent} event
+     */
+    var onStreamMessage = function(event) {
+        var data = event.data;
+        if (!data || typeof data !== 'object') {
+            return;
+        }
+        if (data.context !== 'stream' || data.action !== 'ended') {
+            return;
+        }
+        if (!activeContext.playlistItem || !activeContext.container) {
+            return;
+        }
+
+        // Prefer the exact ended signal from the embed over the duration timer.
+        clearAutoplayTimer();
+        playNextItem(activeContext.playlistItem, activeContext.container);
     };
 
     /**
@@ -267,6 +309,8 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             $('.playlist-item').on('click', function() {
                 loadPlaylistItem($(this), false);
             });
+
+            window.addEventListener('message', onStreamMessage);
 
             document.addEventListener('visibilitychange', function() {
                 if (document.hidden) {

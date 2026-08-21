@@ -57,7 +57,6 @@ class player extends external_api {
         $cm = get_coursemodule_from_id('stream', $params['cmid'], 0, false, MUST_EXIST);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        //require_capability('mod/stream:view', $context);
 
         return [
             'html' => \mod_stream\stream_video::player(
