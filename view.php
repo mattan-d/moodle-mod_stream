@@ -94,7 +94,6 @@ $event->add_record_snapshot($PAGE->cm->modname, $stream);
 $event->trigger();
 
 $PAGE->set_url('/mod/stream/view.php', ['id' => $cm->id]);
-$PAGE->requires->js_call_amd('mod_stream/playlist', 'init');
 $PAGE->set_title(format_string($stream->name));
 $PAGE->set_heading(format_string($course->fullname));
 
@@ -270,6 +269,15 @@ if (!empty($videos)) {
     // Mark first video as active
     $videos[0]->active = true;
 }
+
+$playlistdurations = [];
+foreach ($videos as $video) {
+    $playlistdurations[(string) $video->id] = (int) ($video->durationseconds ?? 0);
+}
+$PAGE->requires->js_call_amd('mod_stream/playlist', 'init', [[
+    'autoplaynext' => !empty($stream->autoplaynext),
+    'durations' => $playlistdurations,
+]]);
 
 echo $OUTPUT->render_from_template('mod_stream/playlist', $template_data);
 

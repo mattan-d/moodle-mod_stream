@@ -2,23 +2,26 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
     'use strict';
 
     /**
-     * Playlist autoplay with the original Stream embed iframe.
+     * Playlist autoplay using only Moodle-side duration timing.
+     * Uses the original Stream iframe embed (no postMessage, no native video).
      *
-     * Primary: postMessage from VideoTube ({context:'stream', action:'ended'}).
-     * Fallback: duration timer from playlist metadata.
+     * Timer starts when the learner engages the player (click into iframe),
+     * or immediately after an auto-advanced load with autoplay=1.
      */
+
+    var config = {
+        autoplaynext: false,
+        durations: {}
+    };
 
     var timerState = {
         timeoutId: null,
+        intervalId: null,
         token: 0,
         remainingMs: 0,
         deadline: 0,
         paused: false,
-        playlistItem: null,
-        container: null
-    };
-
-    var activeContext = {
+        armedForId: null,
         playlistItem: null,
         container: null
     };
@@ -28,6 +31,9 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
      * @return {boolean}
      */
     var isAutoplayNextEnabled = function(container) {
+        if (config.autoplaynext) {
+            return true;
+        }
         var attr = container.attr('data-autoplaynext');
         if (typeof attr !== 'undefined' && attr !== null && attr !== '') {
             return attr === '1' || attr === 'true';
@@ -69,10 +75,34 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
 
     /**
      * @param {jQuery} playlistItem
+     * @return {string}
+     */
+    var getItemId = function(playlistItem) {
+        var id = playlistItem.attr('data-identifier');
+        if (typeof id === 'undefined' || id === null || id === '') {
+            id = playlistItem.data('identifier');
+        }
+        return String(id);
+    };
+
+    /**
+     * @param {jQuery} playlistItem
      * @return {number}
      */
     var getItemDurationSeconds = function(playlistItem) {
+        var id = getItemId(playlistItem);
+        if (id && Object.prototype.hasOwnProperty.call(config.durations, id)) {
+            var fromConfig = parseDurationSeconds(config.durations[id]);
+            if (fromConfig > 0) {
+                return fromConfig;
+            }
+        }
+
         var seconds = parseDurationSeconds(playlistItem.attr('data-duration-seconds'));
+        if (seconds > 0) {
+            return seconds;
+        }
+        seconds = parseDurationSeconds(playlistItem.data('durationSeconds'));
         if (seconds > 0) {
             return seconds;
         }
@@ -88,10 +118,15 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             window.clearTimeout(timerState.timeoutId);
             timerState.timeoutId = null;
         }
+        if (timerState.intervalId) {
+            window.clearInterval(timerState.intervalId);
+            timerState.intervalId = null;
+        }
         timerState.token += 1;
         timerState.remainingMs = 0;
         timerState.deadline = 0;
         timerState.paused = false;
+        timerState.armedForId = null;
         timerState.playlistItem = null;
         timerState.container = null;
     };
@@ -120,9 +155,49 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
     /**
      * @param {jQuery} playlistItem
      * @param {jQuery} container
+     * @param {number} delayMs
+     */
+    var startCountdown = function(playlistItem, container, delayMs) {
+        clearAutoplayTimer();
+
+        timerState.token += 1;
+        var token = timerState.token;
+        timerState.playlistItem = playlistItem;
+        timerState.container = container;
+        timerState.armedForId = getItemId(playlistItem);
+        timerState.remainingMs = delayMs;
+        timerState.deadline = Date.now() + delayMs;
+        timerState.paused = false;
+
+        // Poll deadline so background timer throttling is less likely to skip the switch.
+        timerState.intervalId = window.setInterval(function() {
+            if (token !== timerState.token || timerState.paused) {
+                return;
+            }
+            if (Date.now() < timerState.deadline) {
+                return;
+            }
+            window.clearInterval(timerState.intervalId);
+            timerState.intervalId = null;
+            playNextItem(playlistItem, container);
+        }, 500);
+    };
+
+    /**
+     * @param {jQuery} playlistItem
+     * @param {jQuery} container
      */
     var armAutoplayTimer = function(playlistItem, container) {
         if (!isAutoplayNextEnabled(container)) {
+            return;
+        }
+        if (!playlistItem || !playlistItem.length || !playlistItem.hasClass('active')) {
+            return;
+        }
+
+        var itemId = getItemId(playlistItem);
+        if (timerState.armedForId === itemId && (timerState.intervalId || timerState.paused)) {
+            // Already counting for this item.
             return;
         }
 
@@ -136,43 +211,18 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             return;
         }
 
-        // +1s buffer so the last second is not cut off if postMessage never arrives.
+        // Small buffer so the last second is not cut off.
         startCountdown(playlistItem, container, (durationSeconds + 1) * 1000);
     };
 
-    /**
-     * @param {jQuery} playlistItem
-     * @param {jQuery} container
-     * @param {number} delayMs
-     */
-    var startCountdown = function(playlistItem, container, delayMs) {
-        if (timerState.timeoutId) {
-            window.clearTimeout(timerState.timeoutId);
-            timerState.timeoutId = null;
-        }
-
-        timerState.token += 1;
-        var token = timerState.token;
-        timerState.playlistItem = playlistItem;
-        timerState.container = container;
-        timerState.remainingMs = delayMs;
-        timerState.deadline = Date.now() + delayMs;
-        timerState.paused = false;
-
-        timerState.timeoutId = window.setTimeout(function() {
-            if (token !== timerState.token) {
-                return;
-            }
-            playNextItem(playlistItem, container);
-        }, delayMs);
-    };
-
     var pauseCountdown = function() {
-        if (!timerState.timeoutId || timerState.paused) {
+        if (timerState.paused || !timerState.deadline) {
             return;
         }
-        window.clearTimeout(timerState.timeoutId);
-        timerState.timeoutId = null;
+        if (timerState.intervalId) {
+            window.clearInterval(timerState.intervalId);
+            timerState.intervalId = null;
+        }
         timerState.remainingMs = Math.max(0, timerState.deadline - Date.now());
         timerState.paused = true;
     };
@@ -182,20 +232,16 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             return;
         }
         if (timerState.remainingMs <= 0) {
+            playNextItem(timerState.playlistItem, timerState.container);
             return;
         }
         startCountdown(timerState.playlistItem, timerState.container, timerState.remainingMs);
     };
 
     /**
-     * @param {jQuery} mainVideoContainer
-     * @param {jQuery} playlistItem
-     * @param {jQuery} container
+     * Start timing after the learner clicks into the embed iframe.
      */
-    var bindIframeLoadThenArm = function(mainVideoContainer, playlistItem, container) {
-        activeContext.playlistItem = playlistItem;
-        activeContext.container = container;
-
+    var bindIframeEngagement = function(mainVideoContainer, playlistItem, container) {
         var iframe = mainVideoContainer.find('iframe.stream-video-iframe').first();
         if (!iframe.length) {
             iframe = mainVideoContainer.find('iframe').filter(function() {
@@ -203,47 +249,57 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
                 return src.indexOf('/embed-audio/') === -1;
             }).first();
         }
-
-        var armed = false;
-        var arm = function() {
-            if (armed) {
-                return;
-            }
-            armed = true;
-            armAutoplayTimer(playlistItem, container);
-        };
-
         if (!iframe.length) {
-            arm();
             return;
         }
 
-        iframe.off('load.streamAutoplay').on('load.streamAutoplay', function() {
-            arm();
-        });
+        var tryArmFromEngagement = function() {
+            window.setTimeout(function() {
+                var active = document.activeElement;
+                if (active === iframe.get(0)) {
+                    armAutoplayTimer(playlistItem, container);
+                }
+            }, 0);
+        };
 
-        // Fallback if load already fired or never fires.
-        window.setTimeout(arm, 1500);
+        $(window).off('blur.streamAutoplay').on('blur.streamAutoplay', tryArmFromEngagement);
+        iframe.off('pointerenter.streamAutoplay').on('pointerenter.streamAutoplay', function() {
+            // Some browsers do not move focus into the iframe immediately.
+            armAutoplayTimer(playlistItem, container);
+        });
     };
 
     /**
-     * @param {MessageEvent} event
+     * @param {jQuery} mainVideoContainer
+     * @param {jQuery} playlistItem
+     * @param {jQuery} container
+     * @param {boolean} autoplay
      */
-    var onStreamMessage = function(event) {
-        var data = event.data;
-        if (!data || typeof data !== 'object') {
-            return;
-        }
-        if (data.context !== 'stream' || data.action !== 'ended') {
-            return;
-        }
-        if (!activeContext.playlistItem || !activeContext.container) {
+    var setupPlayerTiming = function(mainVideoContainer, playlistItem, container, autoplay) {
+        if (!isAutoplayNextEnabled(container)) {
             return;
         }
 
-        // Prefer the exact ended signal from the embed over the duration timer.
-        clearAutoplayTimer();
-        playNextItem(activeContext.playlistItem, activeContext.container);
+        if (autoplay) {
+            // Next item was auto-advanced; playback should start via ?autoplay=1.
+            var armed = false;
+            var arm = function() {
+                if (armed) {
+                    return;
+                }
+                armed = true;
+                armAutoplayTimer(playlistItem, container);
+            };
+            var iframe = mainVideoContainer.find('iframe').first();
+            if (iframe.length) {
+                iframe.off('load.streamAutoplay').on('load.streamAutoplay', arm);
+            }
+            window.setTimeout(arm, 1200);
+            return;
+        }
+
+        // First / manually selected video: wait until the user engages the player.
+        bindIframeEngagement(mainVideoContainer, playlistItem, container);
     };
 
     /**
@@ -259,8 +315,9 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
         }
 
         clearAutoplayTimer();
+        $(window).off('blur.streamAutoplay');
 
-        var identifier = playlistItem.data('identifier');
+        var identifier = getItemId(playlistItem);
         var cmid = container.data('cmid');
         var includeaudio = container.data('includeaudio');
 
@@ -298,19 +355,26 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
             }
         }])[0].done(function(response) {
             mainVideoContainer.html(response.html);
-            bindIframeLoadThenArm(mainVideoContainer, playlistItem, container);
+            setupPlayerTiming(mainVideoContainer, playlistItem, container, !!autoplay);
         }).fail(function() {
             mainVideoContainer.html('<div class="alert alert-danger">Failed to load video.</div>');
         });
     };
 
     return {
-        init: function() {
+        /**
+         * @param {Object} [opts]
+         * @param {boolean} [opts.autoplaynext]
+         * @param {Object} [opts.durations] Map of video id → seconds
+         */
+        init: function(opts) {
+            opts = opts || {};
+            config.autoplaynext = !!opts.autoplaynext;
+            config.durations = opts.durations || {};
+
             $('.playlist-item').on('click', function() {
                 loadPlaylistItem($(this), false);
             });
-
-            window.addEventListener('message', onStreamMessage);
 
             document.addEventListener('visibilitychange', function() {
                 if (document.hidden) {
@@ -327,10 +391,11 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
                 }
                 var active = container.find('.playlist-item.active').first();
                 if (!active.length) {
+                    // Single-video layout: no playlist items in DOM.
                     return;
                 }
                 var mainVideoContainer = container.find('.stream-main-video');
-                bindIframeLoadThenArm(mainVideoContainer, active, container);
+                setupPlayerTiming(mainVideoContainer, active, container, false);
             });
         }
     };
