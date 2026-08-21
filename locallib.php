@@ -124,18 +124,17 @@ class stream_video {
         $html = '';
         $query = 'token=' . urlencode($token);
         if ($autoplay) {
-            $query .= '&autoplay=1';
+            // Multiple param names for compatibility with older Stream/VideoTube embeds.
+            $query .= '&autoplay=1&autoPlay=1&auto_play=1';
         }
-        $allow = $autoplay ? "allow='autoplay; fullscreen; encrypted-media'" : "allow='fullscreen; encrypted-media'";
+        $videoallow = "allow='autoplay; fullscreen; encrypted-media; picture-in-picture'";
 
         if ($includeaudio) {
             $html .= "<div class='stream-background'><iframe width='960px' style='height: 150px !important;' height='100px' frameborder='0' " .
-                    "allowfullscreen {$allow} src='{$config->apiendpoint}/embed-audio/{$identifier}?{$query}'></iframe></div>";
+                    "allowfullscreen allow='autoplay; fullscreen; encrypted-media' src='{$config->apiendpoint}/embed-audio/{$identifier}?{$query}'></iframe></div>";
         }
 
-        // Always allow autoplay on the video iframe so sequential playlist playback is not blocked.
-        $videoallow = "allow='autoplay; fullscreen; encrypted-media'";
-        $html .= "<div class='stream-background'><iframe width='960px' height='540px' frameborder='0' " .
+        $html .= "<div class='stream-background'><iframe class='stream-video-iframe' width='960px' height='540px' frameborder='0' " .
                 "allowfullscreen {$videoallow} src='{$config->apiendpoint}/embed/{$identifier}?{$query}'></iframe></div>";
 
         return $html;

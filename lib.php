@@ -176,11 +176,12 @@ function stream_duration_to_seconds($duration) {
         return 0;
     }
     if (is_numeric($duration)) {
-        return max(0, (int) $duration);
+        return max(0, (int) round((float) $duration));
     }
 
     $duration = trim((string) $duration);
-    if ($duration === '' || !preg_match('/^\d{1,2}(:\d{1,2}){0,2}$/', $duration)) {
+    // Accept "SS", "MM:SS", "HH:MM:SS" (hours may be > 99).
+    if ($duration === '' || !preg_match('/^\d+(:\d{1,2}){0,2}$/', $duration)) {
         return 0;
     }
 
