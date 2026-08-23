@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2026082401;
+$plugin->version = 2026082402;
 $plugin->requires = 2017111300;
 $plugin->release = 'v2.3';
 $plugin->component = 'mod_stream';

@@ -79,7 +79,85 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
       if (!existing) {
         self.allVideos.push(video);
       }
+      if (!self.selectedVideoCache.find((v) => self.normalizeId(v.id) === id)) {
+        self.selectedVideoCache.push(video);
+      }
     });
+  },
+
+  isPlaceholderVideoName: function(name, videoId) {
+    if (!name) {
+      return true;
+    }
+    name = String(name).trim();
+    return name === '' || name === ('Video ' + videoId) || name === 'New Video';
+  },
+
+  normalizeVideoNames: function(names) {
+    var normalized = {};
+    Object.keys(names || {}).forEach((key) => {
+      var id = this.normalizeId(key);
+      if (id) {
+        normalized[id] = names[key];
+      }
+    });
+    return normalized;
+  },
+
+  getVideoMetadata: function(videoId) {
+    var meta = {title: '', thumbnail: ''};
+
+    var videoElement = $('#video_identifier_' + videoId);
+    if (videoElement.length > 0) {
+      meta.title = videoElement.find('.title').text().trim();
+      meta.thumbnail = videoElement.find('img').attr('src') || '';
+      return meta;
+    }
+
+    var cachedVideo = this.allVideos.find((v) => this.normalizeId(v.id) === videoId);
+    if (!cachedVideo) {
+      cachedVideo = this.selectedVideoCache.find((v) => this.normalizeId(v.id) === videoId);
+    }
+    if (cachedVideo) {
+      meta.title = cachedVideo.title || '';
+      meta.thumbnail = cachedVideo.thumbnail || '';
+    }
+
+    return meta;
+  },
+
+  getDisplayName: function(videoId) {
+    var customName = this.videoNames[videoId];
+    if (!this.isPlaceholderVideoName(customName, videoId)) {
+      return customName;
+    }
+
+    var meta = this.getVideoMetadata(videoId);
+    if (meta.title) {
+      return meta.title;
+    }
+
+    return customName || ('Video ' + videoId);
+  },
+
+  mergeTitlesFromCache: function() {
+    var self = this;
+    var changed = false;
+
+    this.selectedIds.forEach((videoId) => {
+      if (!self.isPlaceholderVideoName(self.videoNames[videoId], videoId)) {
+        return;
+      }
+      var meta = self.getVideoMetadata(videoId);
+      if (meta.title) {
+        self.videoNames[videoId] = meta.title;
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      $('input[name=video_names]').val(JSON.stringify(this.videoNames));
+    }
   },
 
   init: function(config) {
@@ -92,6 +170,7 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
     this.videoOrder = [];
     this.videoNames = {};
     this.allVideos = [];
+    this.selectedVideoCache = (config.initialvideos || []).slice();
     this.cacheInitialVideos(config.initialvideos || []);
 
     // Initialize video order from existing data
@@ -109,16 +188,17 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
     try {
       var namesData = $('input[name=video_names]').val();
       if (namesData) {
-        this.videoNames = JSON.parse(namesData);
+        this.videoNames = this.normalizeVideoNames(JSON.parse(namesData));
       }
     } catch (e) {
       this.videoNames = {};
     }
 
+    this.mergeTitlesFromCache();
+
     this.currentPage = 1;
     this.itemsPerPage = 12; // 3 rows of 4 items
     this.totalVideos = 0;
-    this.selectedVideoCache = [];
 
     // Initialize sortable playlist
     this.initSortablePlaylist();
@@ -330,29 +410,15 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
         return;
       }
 
-      var displayName = this.videoNames[videoId] || 'Video ' + videoId;
-      var thumbnail = '';
-      var title = displayName;
+      var displayName = this.getDisplayName(videoId);
+      var meta = this.getVideoMetadata(videoId);
+      var thumbnail = meta.thumbnail;
+      var title = meta.title || displayName;
 
-      // Try to get video details from current page or cached data
-      var videoElement = $('#video_identifier_' + videoId);
-      if (videoElement.length > 0) {
-        title = videoElement.find('.title').text().trim();
-        thumbnail = videoElement.find('img').attr('src');
-        // Update name if not set
-        if (!this.videoNames[videoId]) {
-          this.videoNames[videoId] = title;
-        }
-      } else {
-        // Video not on current page, try to find in cached data
-        var cachedVideo = this.allVideos.find((v) => this.normalizeId(v.id) === videoId);
-        if (!cachedVideo) {
-          cachedVideo = this.selectedVideoCache.find((v) => this.normalizeId(v.id) === videoId);
-        }
-        if (cachedVideo) {
-          title = this.videoNames[videoId] || cachedVideo.title;
-          thumbnail = cachedVideo.thumbnail;
-        }
+      if ($('#video_identifier_' + videoId).length > 0 && this.isPlaceholderVideoName(this.videoNames[videoId], videoId)) {
+        this.videoNames[videoId] = title;
+      } else if (meta.title && this.isPlaceholderVideoName(this.videoNames[videoId], videoId)) {
+        this.videoNames[videoId] = meta.title;
       }
 
       var playlistItem = $(
@@ -380,6 +446,8 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
       playlist.append(playlistItem);
     });
 
+    $('input[name=video_names]').val(JSON.stringify(this.videoNames));
+
     var self = this;
     $('.playlist-title-input').on('input', function() {
       var videoId = self.normalizeId($(this).data('video-id'));
@@ -396,7 +464,10 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
         } else {
           // Try cached data
           var cachedVideo = self.allVideos.find((v) => self.normalizeId(v.id) === videoId);
-          if (cachedVideo) {
+          if (!cachedVideo) {
+            cachedVideo = self.selectedVideoCache.find((v) => self.normalizeId(v.id) === videoId);
+          }
+          if (cachedVideo && cachedVideo.title) {
             self.videoNames[videoId] = cachedVideo.title;
             $(this).val(cachedVideo.title);
           }
@@ -546,6 +617,7 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
             }
 
             if (key === videosToShow.length - 1) {
+              self.mergeTitlesFromCache();
               self.updatePlaylistOrder();
             }
 
@@ -702,6 +774,7 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
         }
 
         if (key === videosToShow.length - 1) {
+          this.mergeTitlesFromCache();
           this.updatePlaylistOrder();
         }
 
