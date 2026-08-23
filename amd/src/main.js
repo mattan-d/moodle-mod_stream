@@ -637,76 +637,89 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
 
   updatePagination: function(totalPages) {
     var paginationContainer = $('#stream-pagination');
+    var self = this;
 
     if (totalPages <= 1) {
       paginationContainer.html('');
       return;
     }
 
-    var paginationHtml = '<nav aria-label="Video pagination"><ul class="pagination justify-content-center">';
-
-    // Previous button
-    if (this.currentPage > 1) {
-      paginationHtml +=
-          '<li class="page-item"><a class="page-link" href="#" data-page="' +
-          (this.currentPage - 1) +
-          '">&laquo; Previous</a></li>';
-    } else {
-      paginationHtml += '<li class="page-item disabled"><span class="page-link">&laquo; Previous</span></li>';
-    }
-
-    // Page numbers
-    var startPage = Math.max(1, this.currentPage - 2);
-    var endPage = Math.min(totalPages, this.currentPage + 2);
-
-    if (startPage > 1) {
-      paginationHtml += '<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>';
-      if (startPage > 2) {
-        paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-      }
-    }
-
-    for (var i = startPage; i <= endPage; i++) {
-      if (i === this.currentPage) {
-        paginationHtml += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
-      } else {
-        paginationHtml += '<li class="page-item"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-      }
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-      }
-      paginationHtml +=
-          '<li class="page-item"><a class="page-link" href="#" data-page="' + totalPages + '">' + totalPages + '</a></li>';
-    }
-
-    // Next button
-    if (this.currentPage < totalPages) {
-      paginationHtml +=
-          '<li class="page-item"><a class="page-link" href="#" data-page="' +
-          (this.currentPage + 1) +
-          '">Next &raquo;</a></li>';
-    } else {
-      paginationHtml += '<li class="page-item disabled"><span class="page-link">Next &raquo;</span></li>';
-    }
-
-    paginationHtml += '</ul></nav>';
-
-    // Show results info
     var startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
     var endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalVideos);
-    var infoHtml =
-        '<div class="text-center mb-3"><small class="text-muted">Showing ' +
-        startItem +
-        '-' +
-        endItem +
-        ' of ' +
-        this.totalVideos +
-        ' videos</small></div>';
 
-    paginationContainer.html(infoHtml + paginationHtml);
+    str.get_strings([
+      {key: 'paginationprevious', component: 'mod_stream'},
+      {key: 'paginationnext', component: 'mod_stream'},
+      {
+        key: 'paginationsummary',
+        component: 'mod_stream',
+        param: {
+          start: startItem,
+          end: endItem,
+          total: this.totalVideos,
+        },
+      },
+      {key: 'paginationlabel', component: 'mod_stream'},
+    ]).then((strings) => {
+      var previousLabel = strings[0];
+      var nextLabel = strings[1];
+      var summaryLabel = strings[2];
+      var ariaLabel = strings[3];
+      var paginationHtml = '<nav aria-label="' + ariaLabel + '"><ul class="pagination justify-content-center">';
+
+      if (self.currentPage > 1) {
+        paginationHtml +=
+            '<li class="page-item"><a class="page-link" href="#" data-page="' +
+            (self.currentPage - 1) +
+            '">' + previousLabel + '</a></li>';
+      } else {
+        paginationHtml += '<li class="page-item disabled"><span class="page-link">' + previousLabel + '</span></li>';
+      }
+
+      var startPage = Math.max(1, self.currentPage - 2);
+      var endPage = Math.min(totalPages, self.currentPage + 2);
+
+      if (startPage > 1) {
+        paginationHtml += '<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>';
+        if (startPage > 2) {
+          paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+      }
+
+      for (var i = startPage; i <= endPage; i++) {
+        if (i === self.currentPage) {
+          paginationHtml += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
+        } else {
+          paginationHtml += '<li class="page-item"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+        }
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+        paginationHtml +=
+            '<li class="page-item"><a class="page-link" href="#" data-page="' + totalPages + '">' + totalPages + '</a></li>';
+      }
+
+      if (self.currentPage < totalPages) {
+        paginationHtml +=
+            '<li class="page-item"><a class="page-link" href="#" data-page="' +
+            (self.currentPage + 1) +
+            '">' + nextLabel + '</a></li>';
+      } else {
+        paginationHtml += '<li class="page-item disabled"><span class="page-link">' + nextLabel + '</span></li>';
+      }
+
+      paginationHtml += '</ul></nav>';
+
+      var infoHtml =
+          '<div class="text-center mb-3"><small class="text-muted">' + summaryLabel + '</small></div>';
+
+      paginationContainer.html(infoHtml + paginationHtml);
+    }).catch(() => {
+      paginationContainer.html('');
+    });
   },
 
   renderCurrentPage: function() {

@@ -26,20 +26,27 @@
 }
 
 .path-mod-stream #stream-load #stream-elements {
-  padding: 15px;
+  padding: 15px 10px;
 }
 
-.path-mod-stream #stream-load #stream-elements .list-item-grid:hover {
-  cursor: pointer;
+.path-mod-stream #stream-load #stream-elements .list-item-grid {
+  margin-bottom: 1.25rem;
+  padding: 0 10px;
 }
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item {
   display: block;
-  padding: 15px;
+  padding: 16px 14px 18px;
   text-align: center;
   position: relative;
   text-decoration: none;
   border-radius: 10px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.path-mod-stream #stream-load #stream-elements .list-item-grid:hover {
+  cursor: pointer;
 }
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item .thumbnail {
@@ -82,20 +89,24 @@
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item .title {
   display: block;
   color: #4c4949;
-  margin-top: 5px;
+  margin-top: 10px;
   font-weight: 600;
   overflow: hidden;
-  text-align: left;
+  text-align: right;
+  line-height: 1.4;
+  min-height: 2.8em;
 }
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item .details {
   color: #4c4949;
-  margin-top: 5px;
+  margin-top: 8px;
   overflow: hidden;
-  text-align: left;
+  text-align: right;
   font-size: 12px;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item .details .bubble {
@@ -135,6 +146,17 @@
 
 .path-mod-stream #stream-load #stream-elements .list-item-grid .item.selected:hover {
   background-color: rgba(51, 122, 183, 0.69);
+}
+
+.path-mod-stream #stream-load #stream-pagination {
+  margin-top: 1rem;
+  padding: 0 10px 10px;
+}
+
+.path-mod-stream #stream-load #stream-pagination .pagination {
+  margin-bottom: 0;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .path-mod-stream #stream-load #stream-elements .alert {
