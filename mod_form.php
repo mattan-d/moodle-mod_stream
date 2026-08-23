@@ -46,7 +46,8 @@ class mod_stream_mod_form extends moodleform_mod {
 
         $mform = $this->_form;
         $PAGE->requires->jquery();
-        $PAGE->requires->js_call_amd('mod_stream/main', 'init');
+
+        $jsinitargs = [];
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
@@ -118,6 +119,8 @@ class mod_stream_mod_form extends moodleform_mod {
         if (!empty($this->current->instance)) {
             $stream = $DB->get_record('stream', ['id' => $this->current->instance]);
             if ($stream) {
+                $stream->video_order = stream_sync_video_order($stream->identifier ?? '', $stream->video_order ?? '[]');
+
                 // Set default for identifier
                 $mform->setDefault('identifier', $stream->identifier);
 
@@ -131,22 +134,29 @@ class mod_stream_mod_form extends moodleform_mod {
                 $mform->setDefault('autoplaynext', $stream->autoplaynext ?? 1);
 
                 // Set default for video_order
-                if (!empty($stream->video_order)) {
-                    $mform->setDefault('video_order', $stream->video_order);
-                } else {
-                    // If no video_order exists, create one from the identifier order
-                    $identifiers = array_filter(explode(',', $stream->identifier));
-                    if (!empty($identifiers)) {
-                        $mform->setDefault('video_order', json_encode(array_values($identifiers)));
-                    } else {
-                        $mform->setDefault('video_order', '[]');
-                    }
-                }
+                $mform->setDefault('video_order', $stream->video_order);
 
                 if (!empty($stream->video_names)) {
                     $mform->setDefault('video_names', $stream->video_names);
                 } else {
                     $mform->setDefault('video_names', '{}');
+                }
+
+                $identifiers = stream_parse_identifiers($stream->identifier ?? '');
+                if (!empty($identifiers)) {
+                    $selectedvideos = \mod_stream\stream_video::get_videos_by_id($identifiers);
+                    $initialvideos = [];
+                    foreach ($selectedvideos as $video) {
+                        $initialvideos[] = [
+                            'id' => (string) $video->id,
+                            'title' => (string) ($video->title ?? ''),
+                            'thumbnail' => (string) ($video->thumbnail ?? ''),
+                            'duration' => (string) ($video->duration ?? ''),
+                        ];
+                    }
+                    if (!empty($initialvideos)) {
+                        $jsinitargs['initialvideos'] = $initialvideos;
+                    }
                 }
             }
         } else {
@@ -219,6 +229,8 @@ class mod_stream_mod_form extends moodleform_mod {
 
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
+
+        $PAGE->requires->js_call_amd('mod_stream/main', 'init', [$jsinitargs]);
     }
 
     /**
@@ -280,6 +292,13 @@ class mod_stream_mod_form extends moodleform_mod {
      */
     public function data_preprocessing(&$default_values) {
         parent::data_preprocessing($default_values);
+
+        if (!empty($default_values['identifier'])) {
+            $default_values['video_order'] = stream_sync_video_order(
+                $default_values['identifier'],
+                $default_values['video_order'] ?? '[]'
+            );
+        }
 
         // Ensure video_order is properly set during data preprocessing
         if (isset($default_values['video_order']) && !empty($default_values['video_order'])) {

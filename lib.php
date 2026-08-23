@@ -62,6 +62,7 @@ function stream_add_instance(stdClass $stream, $mform = null) {
     if (empty($stream->video_order)) {
         $stream->video_order = '[]';
     }
+    $stream->video_order = stream_sync_video_order($stream->identifier ?? '', $stream->video_order);
     
     // Ensure collection_mode is properly handled
     if (!isset($stream->collection_mode)) {
@@ -101,6 +102,7 @@ function stream_update_instance(stdClass $stream, $mform = null) {
     if (empty($stream->video_order)) {
         $stream->video_order = '[]';
     }
+    $stream->video_order = stream_sync_video_order($stream->identifier ?? '', $stream->video_order);
     
     // Ensure collection_mode is properly handled
     if (!isset($stream->collection_mode)) {
@@ -161,6 +163,65 @@ function stream_get_coursemodule_info($cm) {
   }
   $info = new \completion_info($cm);
   return $info;
+}
+
+/**
+ * Parse comma-separated video identifiers from the activity identifier field.
+ *
+ * @param string|null $identifier
+ * @return string[]
+ */
+function stream_parse_identifiers($identifier) {
+    if ($identifier === null || $identifier === '') {
+        return [];
+    }
+
+    $identifier = trim((string) $identifier);
+    if ($identifier === '' || $identifier === 'auto_collection') {
+        return [];
+    }
+
+    $ids = array_map('trim', explode(',', $identifier));
+    $ids = array_filter($ids, static function($id) {
+        return $id !== '' && $id !== 'auto_collection';
+    });
+
+    return array_values(array_map('strval', $ids));
+}
+
+/**
+ * Keep video_order aligned with identifier: preserve existing order, append any missing IDs.
+ *
+ * @param string|null $identifier
+ * @param string|null $videoorder JSON array of video IDs.
+ * @return string JSON array
+ */
+function stream_sync_video_order($identifier, $videoorder) {
+    $identifiers = stream_parse_identifiers($identifier);
+    if (empty($identifiers)) {
+        return '[]';
+    }
+
+    $order = [];
+    if (!empty($videoorder)) {
+        $decoded = json_decode($videoorder, true);
+        if (is_array($decoded)) {
+            foreach ($decoded as $id) {
+                $id = trim((string) $id);
+                if ($id !== '' && in_array($id, $identifiers, true) && !in_array($id, $order, true)) {
+                    $order[] = $id;
+                }
+            }
+        }
+    }
+
+    foreach ($identifiers as $id) {
+        if (!in_array($id, $order, true)) {
+            $order[] = $id;
+        }
+    }
+
+    return json_encode(array_values($order));
 }
 
 /**

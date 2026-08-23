@@ -29,24 +29,82 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
     str,
     url,
 ) => ({
-  init: function() {
+  normalizeId: function(id) {
+    if (id === null || typeof id === 'undefined') {
+      return '';
+    }
+    return String(id).trim();
+  },
+
+  normalizeIdList: function(ids) {
+    var normalized = [];
+    (ids || []).forEach((id) => {
+      id = this.normalizeId(id);
+      if (id && normalized.indexOf(id) === -1) {
+        normalized.push(id);
+      }
+    });
+    return normalized;
+  },
+
+  syncVideoOrderWithSelection: function() {
+    this.selectedIds = this.normalizeIdList(this.selectedIds);
+    this.videoOrder = this.normalizeIdList(this.videoOrder);
+
+    var synced = [];
+    this.videoOrder.forEach((id) => {
+      if (this.selectedIds.indexOf(id) > -1 && synced.indexOf(id) === -1) {
+        synced.push(id);
+      }
+    });
+    this.selectedIds.forEach((id) => {
+      if (synced.indexOf(id) === -1) {
+        synced.push(id);
+      }
+    });
+
+    this.videoOrder = synced;
+    $('input[name=identifier]').val(this.selectedIds.join(','));
+    $('input[name=video_order]').val(JSON.stringify(this.videoOrder));
+  },
+
+  cacheInitialVideos: function(videos) {
     var self = this;
+    (videos || []).forEach((video) => {
+      var id = self.normalizeId(video.id);
+      if (!id) {
+        return;
+      }
+      var existing = self.allVideos.find((v) => self.normalizeId(v.id) === id);
+      if (!existing) {
+        self.allVideos.push(video);
+      }
+    });
+  },
+
+  init: function(config) {
+    var self = this;
+    config = config || {};
 
     this.elements = $('#stream-elements');
     this.loadingbars = url.imageUrl('icones/loading-bars', 'stream');
-    this.selectedIds = ($('input[name=identifier]').val() || '').split(',').filter(Boolean);
+    this.selectedIds = this.normalizeIdList(($('input[name=identifier]').val() || '').split(','));
     this.videoOrder = [];
     this.videoNames = {};
+    this.allVideos = [];
+    this.cacheInitialVideos(config.initialvideos || []);
 
     // Initialize video order from existing data
     try {
       var orderData = $('input[name=video_order]').val();
       if (orderData) {
-        this.videoOrder = JSON.parse(orderData);
+        this.videoOrder = this.normalizeIdList(JSON.parse(orderData));
       }
     } catch (e) {
       this.videoOrder = [];
     }
+
+    this.syncVideoOrderWithSelection();
 
     try {
       var namesData = $('input[name=video_names]').val();
@@ -60,13 +118,13 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
     this.currentPage = 1;
     this.itemsPerPage = 12; // 3 rows of 4 items
     this.totalVideos = 0;
-    this.allVideos = []; // Store all videos for pagination
+    this.selectedVideoCache = [];
 
     // Initialize sortable playlist
     this.initSortablePlaylist();
 
     $('body').on('click', '#stream-elements .list-item-grid', function() {
-      var itemid = $(this).data('itemid').toString();
+      var itemid = self.normalizeId($(this).data('itemid'));
       var index = self.selectedIds.indexOf(itemid);
 
       if (index > -1) {
@@ -93,6 +151,7 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
       $('input[name=identifier]').val(self.selectedIds.join(','));
       $('input[name=video_order]').val(JSON.stringify(self.videoOrder));
       $('input[name=video_names]').val(JSON.stringify(self.videoNames));
+      self.syncVideoOrderWithSelection();
       self.updatePlaylistOrder();
     });
 
@@ -258,60 +317,72 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
     var playlist = $('#sortable-playlist');
     playlist.empty();
 
-    // Add selected videos to playlist in order, even if not on current page
-    this.videoOrder.forEach((videoId) => {
-      if (this.selectedIds.indexOf(videoId) > -1) {
-        var displayName = this.videoNames[videoId] || 'Video ' + videoId;
-        var thumbnail = '';
-        var title = displayName;
-
-        // Try to get video details from current page or cached data
-        var videoElement = $('#video_identifier_' + videoId);
-        if (videoElement.length > 0) {
-          title = videoElement.find('.title').text().trim();
-          thumbnail = videoElement.find('img').attr('src');
-          // Update name if not set
-          if (!this.videoNames[videoId]) {
-            this.videoNames[videoId] = title;
-          }
-        } else {
-          // Video not on current page, try to find in allVideos cache
-          var cachedVideo = this.allVideos.find((v) => v.id.toString() === videoId);
-          if (cachedVideo) {
-            title = this.videoNames[videoId] || cachedVideo.title;
-            thumbnail = cachedVideo.thumbnail;
-          }
-        }
-
-        var playlistItem = $(
-            '<li class="list-group-item playlist-item" data-video-id="' +
-            videoId +
-            '" draggable="true">' +
-            '<div class="d-flex align-items-center">' +
-            (thumbnail
-                ? '<img src="' +
-                thumbnail +
-                '" class="playlist-thumbnail me-3" style="width: 60px; height: 34px; object-fit: cover;">'
-                : '<div class="playlist-thumbnail me-3" style="width: 60px; height: 34px; background: #ccc;"></div>') +
-            '<input type="text" class="form-control playlist-title-input flex-grow-1 me-2" value="' +
-            displayName.replace(/"/g, '&quot;') +
-            '" data-video-id="' +
-            videoId +
-            '" placeholder="' +
-            title.replace(/"/g, '&quot;') +
-            '">' +
-            '<span class="drag-handle ms-2" style="cursor: move;">⋮⋮</span>' +
-            '</div>' +
-            '</li>',
-        );
-
-        playlist.append(playlistItem);
+    var displayOrder = this.normalizeIdList(this.videoOrder);
+    this.selectedIds.forEach((id) => {
+      if (displayOrder.indexOf(id) === -1) {
+        displayOrder.push(id);
       }
+    });
+
+    // Add selected videos to playlist in order, even if not on current page
+    displayOrder.forEach((videoId) => {
+      if (this.selectedIds.indexOf(videoId) === -1) {
+        return;
+      }
+
+      var displayName = this.videoNames[videoId] || 'Video ' + videoId;
+      var thumbnail = '';
+      var title = displayName;
+
+      // Try to get video details from current page or cached data
+      var videoElement = $('#video_identifier_' + videoId);
+      if (videoElement.length > 0) {
+        title = videoElement.find('.title').text().trim();
+        thumbnail = videoElement.find('img').attr('src');
+        // Update name if not set
+        if (!this.videoNames[videoId]) {
+          this.videoNames[videoId] = title;
+        }
+      } else {
+        // Video not on current page, try to find in cached data
+        var cachedVideo = this.allVideos.find((v) => this.normalizeId(v.id) === videoId);
+        if (!cachedVideo) {
+          cachedVideo = this.selectedVideoCache.find((v) => this.normalizeId(v.id) === videoId);
+        }
+        if (cachedVideo) {
+          title = this.videoNames[videoId] || cachedVideo.title;
+          thumbnail = cachedVideo.thumbnail;
+        }
+      }
+
+      var playlistItem = $(
+          '<li class="list-group-item playlist-item" data-video-id="' +
+          videoId +
+          '" draggable="true">' +
+          '<div class="d-flex align-items-center">' +
+          (thumbnail
+              ? '<img src="' +
+              thumbnail +
+              '" class="playlist-thumbnail me-3" style="width: 60px; height: 34px; object-fit: cover;">'
+              : '<div class="playlist-thumbnail me-3" style="width: 60px; height: 34px; background: #ccc;"></div>') +
+          '<input type="text" class="form-control playlist-title-input flex-grow-1 me-2" value="' +
+          displayName.replace(/"/g, '&quot;') +
+          '" data-video-id="' +
+          videoId +
+          '" placeholder="' +
+          title.replace(/"/g, '&quot;') +
+          '">' +
+          '<span class="drag-handle ms-2" style="cursor: move;">⋮⋮</span>' +
+          '</div>' +
+          '</li>',
+      );
+
+      playlist.append(playlistItem);
     });
 
     var self = this;
     $('.playlist-title-input').on('input', function() {
-      var videoId = $(this).data('video-id').toString();
+      var videoId = self.normalizeId($(this).data('video-id'));
       var newName = $(this).val().trim();
       if (newName) {
         self.videoNames[videoId] = newName;
@@ -324,7 +395,7 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
           $(this).val(originalTitle);
         } else {
           // Try cached data
-          var cachedVideo = self.allVideos.find((v) => v.id.toString() === videoId);
+          var cachedVideo = self.allVideos.find((v) => self.normalizeId(v.id) === videoId);
           if (cachedVideo) {
             self.videoNames[videoId] = cachedVideo.title;
             $(this).val(cachedVideo.title);
@@ -345,16 +416,16 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
   updateVideoOrderFromPlaylist: function() {
     var newOrder = [];
     $('#sortable-playlist .playlist-item').each(function() {
-      newOrder.push($(this).data('video-id').toString());
+      newOrder.push($(this).data('video-id').toString().trim());
     });
-    this.videoOrder = newOrder;
+    this.videoOrder = this.normalizeIdList(newOrder);
     $('input[name=video_order]').val(JSON.stringify(this.videoOrder));
   },
 
   message: (event, self) => {
     // Check if the message contains the streamid
     if (event.data && event.data.streamid) {
-      var streamid = event.data.streamid.toString();
+      var streamid = self.normalizeId(event.data.streamid);
       if (self.selectedIds.indexOf(streamid) === -1) {
         self.selectedIds.push(streamid);
         if (self.videoOrder.indexOf(streamid) === -1) {
@@ -367,6 +438,7 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
       $('input[name=identifier]').val(self.selectedIds.join(','));
       $('input[name=video_order]').val(JSON.stringify(self.videoOrder));
       $('input[name=video_names]').val(JSON.stringify(self.videoNames));
+      self.syncVideoOrderWithSelection();
       $('#upload_stream').hide();
       self.load();
     }
@@ -377,7 +449,10 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
 
     // Reset pagination when loading new data
     this.currentPage = 1;
-    this.allVideos = [];
+    this.selectedVideoCache = this.allVideos.filter((video) => {
+      return this.selectedIds.indexOf(this.normalizeId(video.id)) > -1;
+    });
+    this.allVideos = this.selectedVideoCache.slice();
     this.totalVideos = 0;
 
     this.elements.html('<div style="text-align:center"><img height="80" src="' + this.loadingbars + '" ></div>');
@@ -403,11 +478,16 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
       if (response.videos.length) {
         // Store all videos and prioritize selected ones
         self.allVideos = response.videos;
+        self.selectedVideoCache.forEach((video) => {
+          if (!self.allVideos.find((v) => self.normalizeId(v.id) === self.normalizeId(video.id))) {
+            self.allVideos.push(video);
+          }
+        });
 
         // Sort videos to show selected ones first
         self.allVideos.sort((a, b) => {
-          const aSelected = self.selectedIds.indexOf(a.id.toString()) > -1;
-          const bSelected = self.selectedIds.indexOf(b.id.toString()) > -1;
+          const aSelected = self.selectedIds.indexOf(self.normalizeId(a.id)) > -1;
+          const bSelected = self.selectedIds.indexOf(self.normalizeId(b.id)) > -1;
 
           if (aSelected && !bSelected) {
             return -1;
@@ -461,7 +541,7 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
                 '</span></span></div>';
             self.elements.append(html);
 
-            if (self.selectedIds.indexOf(video.id.toString()) > -1) {
+            if (self.selectedIds.indexOf(self.normalizeId(video.id)) > -1) {
               $('#video_identifier_' + video.id).find('.item').addClass('selected');
             }
 
@@ -564,8 +644,8 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
 
     // Re-sort videos to show selected ones first (in case selection changed)
     this.allVideos.sort((a, b) => {
-      const aSelected = this.selectedIds.indexOf(a.id.toString()) > -1;
-      const bSelected = this.selectedIds.indexOf(b.id.toString()) > -1;
+      const aSelected = this.selectedIds.indexOf(this.normalizeId(a.id)) > -1;
+      const bSelected = this.selectedIds.indexOf(this.normalizeId(b.id)) > -1;
 
       if (aSelected && !bSelected) {
         return -1;
@@ -617,8 +697,12 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
             '</span></span></div>';
         this.elements.append(html);
 
-        if (this.selectedIds.indexOf(video.id.toString()) > -1) {
+        if (this.selectedIds.indexOf(this.normalizeId(video.id)) > -1) {
           $('#video_identifier_' + video.id).find('.item').addClass('selected');
+        }
+
+        if (key === videosToShow.length - 1) {
+          this.updatePlaylistOrder();
         }
 
         return null;
@@ -626,6 +710,6 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
     });
 
     // Update pagination controls
-    this.updatePagination(totalPages)
+    this.updatePagination(totalPages);
   },
 }))
