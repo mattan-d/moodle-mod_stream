@@ -72,6 +72,13 @@ function stream_add_instance(stdClass $stream, $mform = null) {
     if (!isset($stream->autoplaynext)) {
         $stream->autoplaynext = 1;
     }
+
+    if (!isset($stream->audioonly)) {
+        $stream->audioonly = 0;
+    }
+    if (!empty($stream->audioonly)) {
+        $stream->includeaudio = 1;
+    }
     
     // If collection mode is enabled but no manual selection, set to auto_collection
     if ($stream->collection_mode && (empty($stream->identifier) || trim($stream->identifier) === '')) {
@@ -111,6 +118,13 @@ function stream_update_instance(stdClass $stream, $mform = null) {
 
     if (!isset($stream->autoplaynext)) {
         $stream->autoplaynext = 0;
+    }
+
+    if (!isset($stream->audioonly)) {
+        $stream->audioonly = 0;
+    }
+    if (!empty($stream->audioonly)) {
+        $stream->includeaudio = 1;
     }
     
     // If collection mode is enabled but no manual selection, set to auto_collection

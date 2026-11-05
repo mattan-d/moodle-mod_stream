@@ -98,6 +98,13 @@ class mod_stream_mod_form extends moodleform_mod {
         $mform->addHelpButton('includeaudio', 'includeaudio', 'stream');
         $mform->setDefault('includeaudio', $includeaudio_default);
 
+        $mform->addElement('advcheckbox', 'audioonly', get_string('audioonly', 'stream'),
+                get_string('audioonly_desc', 'stream'));
+        $mform->addHelpButton('audioonly', 'audioonly', 'stream');
+        $mform->setDefault('audioonly', 0);
+        // Audio-only implies the audio player is shown; hide the "include audio" checkbox.
+        $mform->hideIf('includeaudio', 'audioonly', 'checked');
+
         $defaultautoplaynext = get_config('stream', 'defaultautoplaynext');
         $autoplaynext_default = ($defaultautoplaynext !== false) ? (int) $defaultautoplaynext : 1;
         $mform->addElement('advcheckbox', 'autoplaynext', get_string('autoplaynext', 'stream'),
@@ -130,6 +137,9 @@ class mod_stream_mod_form extends moodleform_mod {
 
                 // Set default for includeaudio
                 $mform->setDefault('includeaudio', $stream->includeaudio ?? 0);
+
+                // Set default for audioonly
+                $mform->setDefault('audioonly', $stream->audioonly ?? 0);
 
                 // Set default for autoplaynext
                 $mform->setDefault('autoplaynext', $stream->autoplaynext ?? 1);
@@ -165,6 +175,7 @@ class mod_stream_mod_form extends moodleform_mod {
             $mform->setDefault('video_order', '[]');
             $mform->setDefault('video_names', '{}');
             $mform->setDefault('includeaudio', 0);
+            $mform->setDefault('audioonly', 0);
             $mform->setDefault('autoplaynext', $autoplaynext_default);
         }
 
@@ -327,6 +338,12 @@ class mod_stream_mod_form extends moodleform_mod {
             $default_values['includeaudio'] = (int)$default_values['includeaudio'];
         } else {
             $default_values['includeaudio'] = 0;
+        }
+
+        if (isset($default_values['audioonly'])) {
+            $default_values['audioonly'] = (int) $default_values['audioonly'];
+        } else {
+            $default_values['audioonly'] = 0;
         }
 
         if (isset($default_values['autoplaynext'])) {

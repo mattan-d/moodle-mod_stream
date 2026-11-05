@@ -248,10 +248,11 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
     var bindIframeEngagement = function(mainVideoContainer, playlistItem, container) {
         var iframe = mainVideoContainer.find('iframe.stream-video-iframe').first();
         if (!iframe.length) {
-            iframe = mainVideoContainer.find('iframe').filter(function() {
-                var src = this.getAttribute('src') || '';
-                return src.indexOf('/embed-audio/') === -1;
-            }).first();
+            // Audio-only mode uses the audio iframe.
+            iframe = mainVideoContainer.find('iframe.stream-audio-iframe').first();
+        }
+        if (!iframe.length) {
+            iframe = mainVideoContainer.find('iframe').first();
         }
         if (!iframe.length) {
             return;
@@ -345,6 +346,7 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
         var identifier = getItemId(playlistItem);
         var cmid = container.data('cmid');
         var includeaudio = container.data('includeaudio');
+        var audioonly = container.data('audioonly');
 
         container.find('.playlist-item').removeClass('active');
         playlistItem.addClass('active');
@@ -376,7 +378,8 @@ define(['jquery', 'core/ajax', 'core/str'], function($, ajax, str) {
                 cmid: cmid,
                 identifier: identifier,
                 includeaudio: !!includeaudio,
-                autoplay: !!autoplay
+                autoplay: !!autoplay,
+                audioonly: !!audioonly
             }
         }])[0].done(function(response) {
             mainVideoContainer.html(response.html);

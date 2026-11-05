@@ -104,11 +104,12 @@ class stream_video {
      * @param string $identifier
      * @param boolean $includeaudio
      * @param boolean $autoplay Whether the player should start automatically.
+     * @param boolean $audioonly Whether to show only the audio player (no video).
      *
      * @return string
      * @throws \dml_exception
      */
-    public static function player($cmid, $identifier, $includeaudio = false, $autoplay = false) {
+    public static function player($cmid, $identifier, $includeaudio = false, $autoplay = false, $audioonly = false) {
         global $USER;
 
         $config = get_config('stream');
@@ -129,14 +130,17 @@ class stream_video {
         }
         $videoallow = "allow='autoplay; fullscreen; encrypted-media; picture-in-picture'";
 
-        if ($includeaudio) {
-            $html .= "<div class='stream-background'><iframe width='960px' style='height: 150px !important;' height='100px' frameborder='0' " .
+        $showaudio = !empty($includeaudio) || !empty($audioonly);
+        if ($showaudio) {
+            $html .= "<div class='stream-background stream-audio-player'><iframe class='stream-audio-iframe' width='960px' style='height: 150px !important;' height='100px' frameborder='0' " .
                     "allowfullscreen allow='autoplay; fullscreen; encrypted-media' " .
                     "src='{$config->apiendpoint}/embed-audio/{$identifier}?token=" . urlencode($token) . "'></iframe></div>";
         }
 
-        $html .= "<div class='stream-background'><iframe class='stream-video-iframe' width='960px' height='540px' frameborder='0' " .
-                "allowfullscreen {$videoallow} src='{$config->apiendpoint}/embed/{$identifier}?{$query}'></iframe></div>";
+        if (empty($audioonly)) {
+            $html .= "<div class='stream-background'><iframe class='stream-video-iframe' width='960px' height='540px' frameborder='0' " .
+                    "allowfullscreen {$videoallow} src='{$config->apiendpoint}/embed/{$identifier}?{$query}'></iframe></div>";
+        }
 
         return $html;
     }

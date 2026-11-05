@@ -70,8 +70,12 @@ if (!$available && !has_capability('mod/stream:addinstance', $context)) {
     exit;
 }
 
+$audioonly = !empty($stream->audioonly) ? 1 : 0;
 $includeaudio = $stream->includeaudio ?? 0;
-if (!$includeaudio) {
+if ($audioonly) {
+    // Audio-only mode always uses the audio embed.
+    $includeaudio = 1;
+} else if (!$includeaudio) {
     $audioplayer_config = get_config('stream', 'audioplayer_idnumbers');
     if (!empty($audioplayer_config) && !empty($course->shortname)) {
         $patterns = array_filter(array_map('trim', explode("\n", $audioplayer_config)));
@@ -247,12 +251,13 @@ if (!empty($videos)) {
     $videos[0]->viewed = true;
 
     $helper = new \mod_stream\stream_video();
-    $initial_player = $helper->player($cm->id, $videos[0]->id, $includeaudio);
+    $initial_player = $helper->player($cm->id, $videos[0]->id, $includeaudio, false, $audioonly);
 }
 
 $template_data = [
         'cmid' => $cm->id,
         'includeaudio' => $includeaudio,
+        'audioonly' => $audioonly,
         'autoplaynext' => !empty($stream->autoplaynext) ? 1 : 0,
         'videos' => $videos,
         'initial_player' => $initial_player,

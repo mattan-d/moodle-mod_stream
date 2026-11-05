@@ -71,6 +71,12 @@ class mobile {
         $helper = new \mod_stream\stream_video();
         $stream = $DB->get_record('stream', ['id' => $cm->instance], '*', MUST_EXIST);
 
+        $includeaudio = !empty($stream->includeaudio);
+        $audioonly = !empty($stream->audioonly);
+        if ($audioonly) {
+            $includeaudio = true;
+        }
+
         $identifiers = explode(',', $stream->identifier);
         $playershtml = '';
         foreach ($identifiers as $identifier) {
@@ -78,7 +84,7 @@ class mobile {
             if (empty($identifier)) {
                 continue;
             }
-            $playershtml .= $helper->player($cm->id, $identifier);
+            $playershtml .= $helper->player($cm->id, $identifier, $includeaudio, false, $audioonly);
         }
 
         $data = [

@@ -43,15 +43,17 @@ class player extends external_api {
             'identifier' => new external_value(PARAM_RAW, 'The video identifier'),
             'includeaudio' => new external_value(PARAM_BOOL, 'Whether to include the audio player'),
             'autoplay' => new external_value(PARAM_BOOL, 'Whether the player should autoplay', VALUE_DEFAULT, false),
+            'audioonly' => new external_value(PARAM_BOOL, 'Whether to show only the audio player', VALUE_DEFAULT, false),
         ]);
     }
 
-    public static function get_player_html($cmid, $identifier, $includeaudio, $autoplay = false) {
+    public static function get_player_html($cmid, $identifier, $includeaudio, $autoplay = false, $audioonly = false) {
         $params = self::validate_parameters(self::get_player_html_parameters(), [
             'cmid' => $cmid,
             'identifier' => $identifier,
             'includeaudio' => $includeaudio,
             'autoplay' => $autoplay,
+            'audioonly' => $audioonly,
         ]);
 
         $cm = get_coursemodule_from_id('stream', $params['cmid'], 0, false, MUST_EXIST);
@@ -63,7 +65,8 @@ class player extends external_api {
                 $params['cmid'],
                 $params['identifier'],
                 $params['includeaudio'],
-                $params['autoplay']
+                $params['autoplay'],
+                $params['audioonly']
             )
         ];
     }
