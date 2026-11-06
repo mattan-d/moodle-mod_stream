@@ -38,7 +38,8 @@
             {{#videos}}
             <li class="list-group-item playlist-item {{#active}}active{{/active}}" data-identifier="{{id}}" data-duration-seconds="{{durationseconds}}">
                 <div class="playlist-item-content">
-                    <img class="playlist-thumbnail" src="{{thumbnail}}" alt="{{title}}">
+                    <img class="playlist-thumbnail" src="{{thumbnail}}" alt="{{title}}"
+                         onerror="this.onerror=null;this.classList.add('thumbnail-missing');this.removeAttribute('src');">
                     <div class="playlist-item-details">
                         <div class="playlist-item-title">{{title}}</div>
                         <div class="playlist-item-duration">{{duration}}</div>

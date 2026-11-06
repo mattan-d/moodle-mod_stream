@@ -386,6 +386,11 @@
   margin-right: 15px;
   border-radius: 4px;
   flex-shrink: 0;
+  background: #2b2b2b;
+}
+
+.playlist-thumbnail.thumbnail-missing {
+  background: linear-gradient(135deg, #3a3a3a 0%, #1f1f1f 100%);
 }
 
 .playlist-item-details {

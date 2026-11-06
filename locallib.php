@@ -57,16 +57,23 @@ class stream_video {
         ];
 
         $json = self::call([
-                'term' => $term,
-                'email' => $USER->email,
-                'sort' => $sort,
+                'term' => (string) ($term ?? ''),
+                'email' => (string) ($USER->email ?? ''),
+                'sort' => (string) (($sort !== null && $sort !== '') ? $sort : 'timecreated'),
         ]);
 
         if ($json === false || $json === null || $json === '') {
             return $empty;
         }
 
-        $decoded = json_decode($json, true);
+        // Stream titles may contain invalid UTF-8; without IGNORE the whole decode becomes null.
+        $flags = defined('JSON_INVALID_UTF8_SUBSTITUTE') ? JSON_INVALID_UTF8_SUBSTITUTE : 0;
+        $decoded = json_decode((string) $json, true, 512, $flags);
+        if (!is_array($decoded)) {
+            // Last resort: strip non-UTF8 bytes and retry.
+            $cleaned = iconv('UTF-8', 'UTF-8//IGNORE', (string) $json);
+            $decoded = json_decode((string) $cleaned, true, 512, $flags);
+        }
         if (!is_array($decoded)) {
             return $empty;
         }
@@ -74,6 +81,9 @@ class stream_video {
         $videos = [];
         if (!empty($decoded['videos']) && is_array($decoded['videos'])) {
             foreach ($decoded['videos'] as $video) {
+                if (is_object($video)) {
+                    $video = (array) $video;
+                }
                 if (!is_array($video)) {
                     continue;
                 }
@@ -81,8 +91,20 @@ class stream_video {
             }
         }
 
+        $apistatus = isset($decoded['status']) ? strtolower(trim((string) $decoded['status'])) : '';
+        // Prefer "success" whenever we have rows, even if Stream returned a soft failure.
+        if (!empty($videos)) {
+            $status = 'success';
+        } else if ($apistatus === 'success' || $apistatus === 'ok') {
+            $status = 'success';
+        } else if ($apistatus !== '') {
+            $status = $apistatus;
+        } else {
+            $status = 'error';
+        }
+
         return [
-                'status' => !empty($decoded['status']) ? (string) $decoded['status'] : (empty($videos) ? 'error' : 'success'),
+                'status' => $status,
                 'videos' => $videos,
         ];
     }
@@ -94,7 +116,7 @@ class stream_video {
      * @return array
      */
     public static function normalize_listing_video(array $video) {
-        return [
+        $normalized = [
                 'id' => isset($video['id']) ? (string) $video['id'] : '',
                 'title' => isset($video['title']) ? (string) $video['title'] : '',
                 'thumbnail' => isset($video['thumbnail']) ? (string) $video['thumbnail'] : '',
@@ -107,6 +129,44 @@ class stream_video {
                 'views' => isset($video['views']) ? (int) $video['views'] : 0,
                 'elapsed' => isset($video['elapsed']) ? (string) $video['elapsed'] : '',
         ];
+        return self::ensure_video_thumbnail($normalized);
+    }
+
+    /**
+     * Best-effort Stream thumbnail URL when API metadata has no thumbnail.
+     *
+     * Uses VideoTube's dynamic thumbnail route: /assets/thumbnail/{id}
+     *
+     * @param string|int $videoid
+     * @return string
+     */
+    public static function fallback_thumbnail_url($videoid) {
+        $endpoint = rtrim((string) (get_config('stream', 'apiendpoint') ?: ''), '/');
+        if ($endpoint === '' || $videoid === '' || $videoid === null) {
+            return '';
+        }
+        return $endpoint . '/assets/thumbnail/' . rawurlencode((string) $videoid);
+    }
+
+    /**
+     * Ensure a video object has a usable thumbnail URL.
+     *
+     * @param \stdClass|array $video
+     * @return \stdClass|array
+     */
+    public static function ensure_video_thumbnail($video) {
+        $isarray = is_array($video);
+        $id = $isarray ? ($video['id'] ?? '') : ($video->id ?? '');
+        $thumb = $isarray ? ($video['thumbnail'] ?? '') : ($video->thumbnail ?? '');
+        if ($thumb === null || $thumb === false || trim((string) $thumb) === '') {
+            $thumb = self::fallback_thumbnail_url($id);
+            if ($isarray) {
+                $video['thumbnail'] = $thumb;
+            } else {
+                $video->thumbnail = $thumb;
+            }
+        }
+        return $video;
     }
 
     /**
@@ -119,7 +179,7 @@ class stream_video {
         $video = new \stdClass();
         $video->id = (string) $id;
         $video->title = 'Video ' . $id;
-        $video->thumbnail = '';
+        $video->thumbnail = self::fallback_thumbnail_url($id);
         $video->size = 0;
         $video->date = 0;
         $video->duration = '';
@@ -175,7 +235,7 @@ class stream_video {
             if (isset($videosbyid[$id])) {
                 $video = $videosbyid[$id];
                 $video->id = (string) $video->id;
-                $orderedvideos[] = $video;
+                $orderedvideos[] = self::ensure_video_thumbnail($video);
             } else {
                 // Keep the activity playable even if Stream metadata lookup failed
                 // (privacy filters, API outage, older VideoTube, etc.).
@@ -240,28 +300,33 @@ class stream_video {
      * @param array $data
      */
     public static function call($data = []) {
-        global $CFG;
-
         $config = get_config('stream');
-        if (isset($config->apiendpoint)) {
-            $url = $config->apiendpoint . '/webservice/api/v2';
+        if (empty($config->apiendpoint)) {
+            return false;
+        }
 
-            $headers = [
-                    'Authorization: Bearer ' . $config->accountid,
-                    'Accept: application/json',
-            ];
+        $base = rtrim((string) $config->apiendpoint, '/');
+        $url = $base . '/webservice/api/v2';
 
-            $options = [
-                    'CURLOPT_POST' => true,
-                    'CURLOPT_RETURNTRANSFER' => true,
-                    'CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1,
-                    'CURLOPT_HTTPHEADER' => $headers,
-            ];
+        $headers = [
+                'Authorization: Bearer ' . $config->accountid,
+                'Accept: application/json',
+        ];
 
-            $curl = new \curl();
-            $output = $curl->post($url, $data, $options);
-        } else {
-            $output = false;
+        $options = [
+                'CURLOPT_POST' => true,
+                'CURLOPT_RETURNTRANSFER' => true,
+                'CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1,
+                'CURLOPT_HTTPHEADER' => $headers,
+                'CURLOPT_CONNECTTIMEOUT' => 10,
+                'CURLOPT_TIMEOUT' => 30,
+        ];
+
+        $curl = new \curl();
+        $output = $curl->post($url, $data, $options);
+
+        if ($output === false || $output === null || $output === '') {
+            return false;
         }
 
         return $output;
