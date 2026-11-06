@@ -295,13 +295,36 @@ class stream_video {
     }
 
     /**
+     * Last Stream API call diagnostics (for admin debug page only).
+     *
+     * @var array|null
+     */
+    public static $lastdebug = null;
+
+    /**
      * call execution.
      *
      * @param array $data
+     * @param bool $withdebug Capture diagnostics into stream_video::$lastdebug.
+     * @return string|false
      */
-    public static function call($data = []) {
+    public static function call($data = [], $withdebug = false) {
+        self::$lastdebug = null;
         $config = get_config('stream');
         if (empty($config->apiendpoint)) {
+            if ($withdebug) {
+                self::$lastdebug = [
+                        'ok' => false,
+                        'error' => 'apiendpoint is not configured',
+                        'url' => '',
+                        'post' => $data,
+                        'raw' => '',
+                        'raw_length' => 0,
+                        'http_code' => 0,
+                        'curl_errno' => 0,
+                        'curl_error' => '',
+                ];
+            }
             return false;
         }
 
@@ -324,6 +347,40 @@ class stream_video {
 
         $curl = new \curl();
         $output = $curl->post($url, $data, $options);
+
+        if ($withdebug) {
+            $info = method_exists($curl, 'get_info') ? $curl->get_info() : [];
+            $errno = method_exists($curl, 'get_errno') ? $curl->get_errno() : 0;
+            $error = '';
+            if (method_exists($curl, 'error')) {
+                $error = (string) $curl->error;
+            } else if (method_exists($curl, 'get_error')) {
+                $error = (string) $curl->get_error();
+            }
+            self::$lastdebug = [
+                    'ok' => !($output === false || $output === null || $output === ''),
+                    'url' => $url,
+                    'post' => $data,
+                    'raw' => is_string($output) ? $output : '',
+                    'raw_length' => is_string($output) ? strlen($output) : 0,
+                    'raw_type' => gettype($output),
+                    'http_code' => (int) ($info['http_code'] ?? 0),
+                    'content_type' => (string) ($info['content_type'] ?? ''),
+                    'total_time' => $info['total_time'] ?? null,
+                    'curl_errno' => (int) $errno,
+                    'curl_error' => $error,
+                    'json_error_plain' => null,
+                    'json_error_substitute' => null,
+            ];
+
+            if (is_string($output) && $output !== '') {
+                json_decode($output, true);
+                self::$lastdebug['json_error_plain'] = json_last_error_msg();
+                $flags = defined('JSON_INVALID_UTF8_SUBSTITUTE') ? JSON_INVALID_UTF8_SUBSTITUTE : 0;
+                json_decode($output, true, 512, $flags);
+                self::$lastdebug['json_error_substitute'] = json_last_error_msg();
+            }
+        }
 
         if ($output === false || $output === null || $output === '') {
             return false;

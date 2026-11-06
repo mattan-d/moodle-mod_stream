@@ -34,6 +34,13 @@ $ADMIN->add('modsettings', new admin_externalpage(
         'moodle/site:config'
 ));
 
+$ADMIN->add('modsettings', new admin_externalpage(
+        'modstreamdebuglisting',
+        get_string('debuglisting', 'mod_stream'),
+        new moodle_url('/mod/stream/admin/debug_listing.php'),
+        'moodle/site:config'
+));
+
 if ($ADMIN->fulltree) {
 
     if (get_config('stream', 'accountid')) {
