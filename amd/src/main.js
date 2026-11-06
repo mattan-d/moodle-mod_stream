@@ -540,98 +540,110 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
     ])[0].then((response) => this.list(response, this)).catch((error) => this.failed(error, this));
   },
 
-  failed: (error, self) =>
-      str.get_string('servererror', 'moodle').
-          then((connectionfailed) => self.elements.html('<div class="alert alert-danger">' + connectionfailed + '</div>')),
+  failed: (error, self) => {
+    self = self || this;
+    str.get_string('servererror', 'moodle').then((connectionfailed) => {
+      self.elements.html('<div class="alert alert-danger">' + connectionfailed + '</div>');
+      self.renderVideosFromList(self.selectedVideoCache || []);
+    }).catch(() => {
+      self.elements.html('<div class="alert alert-danger">Error</div>');
+    });
+  },
+
+  renderVideosFromList: function(videos) {
+    var self = this;
+    videos = videos || [];
+    this.allVideos = videos.slice();
+    this.totalVideos = this.allVideos.length;
+
+    if (!this.allVideos.length) {
+      str.get_string('noresults', 'mod_stream').then((noresults) => {
+        this.elements.html('<div class="alert alert-info">' + noresults + '</div>');
+      });
+      this.updatePagination(0);
+      this.updatePlaylistOrder();
+      return;
+    }
+
+    this.allVideos.sort((a, b) => {
+      const aSelected = this.selectedIds.indexOf(this.normalizeId(a.id)) > -1;
+      const bSelected = this.selectedIds.indexOf(this.normalizeId(b.id)) > -1;
+      if (aSelected && !bSelected) {
+        return -1;
+      }
+      if (!aSelected && bSelected) {
+        return 1;
+      }
+      return 0;
+    });
+
+    const totalPages = Math.ceil(this.totalVideos / this.itemsPerPage);
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    const videosToShow = this.allVideos.slice(startIndex, endIndex);
+
+    this.elements.html('');
+
+    str.get_strings([
+      {key: 'views', component: 'mod_stream'},
+      {key: 'before', component: 'mod_stream'},
+    ]).then((string) => {
+      videosToShow.forEach((video) => {
+        var html =
+            '<div class="col list-item-grid" data-itemid="' +
+            video.id +
+            '" id="video_identifier_' +
+            video.id +
+            '">' +
+            '<span class="item"><div class="thumbnail">' +
+            '<img src="' +
+            (video.thumbnail || '') +
+            '" class="img-fluid img-rounded">' +
+            '<span class="datecreated">' +
+            (video.datecreated || '') +
+            '</span><span class="duration">' +
+            (video.duration || '') +
+            '</span></div><span class="title">' +
+            (video.title || ('Video ' + video.id)) +
+            '</span><span class="details">' +
+            (video.views || 0) +
+            ' ' +
+            string[0] +
+            ' <span class="bubble">●</span>' +
+            ' ' +
+            string[1] +
+            ' ' +
+            (video.elapsed || '') +
+            '</span></span></div>';
+        self.elements.append(html);
+
+        if (self.selectedIds.indexOf(self.normalizeId(video.id)) > -1) {
+          $('#video_identifier_' + video.id).find('.item').addClass('selected');
+        }
+      });
+
+      self.mergeTitlesFromCache();
+      self.updatePlaylistOrder();
+      self.updatePagination(totalPages);
+    }).catch((error) => self.failed(error, self));
+  },
 
   list: (response, self) => {
-    if (response.status == 'success') {
-      if (response.videos.length) {
-        // Store all videos and prioritize selected ones
-        self.allVideos = response.videos;
-        self.selectedVideoCache.forEach((video) => {
-          if (!self.allVideos.find((v) => self.normalizeId(v.id) === self.normalizeId(video.id))) {
-            self.allVideos.push(video);
-          }
-        });
-
-        // Sort videos to show selected ones first
-        self.allVideos.sort((a, b) => {
-          const aSelected = self.selectedIds.indexOf(self.normalizeId(a.id)) > -1;
-          const bSelected = self.selectedIds.indexOf(self.normalizeId(b.id)) > -1;
-
-          if (aSelected && !bSelected) {
-            return -1;
-          }
-          if (!aSelected && bSelected) {
-            return 1;
-          }
-          return 0; // Keep original order for videos with same selection status
-        });
-
-        self.totalVideos = response.videos.length;
-
-        // Calculate pagination
-        const totalPages = Math.ceil(self.totalVideos / self.itemsPerPage);
-        const startIndex = (self.currentPage - 1) * self.itemsPerPage;
-        const endIndex = startIndex + self.itemsPerPage;
-        const videosToShow = self.allVideos.slice(startIndex, endIndex);
-
-        self.elements.html('');
-
-        $.each(videosToShow, (key, video) => {
-          str.get_strings([
-            {key: 'views', component: 'mod_stream'},
-            {key: 'before', component: 'mod_stream'},
-          ]).then((string) => {
-            var html =
-                '<div class="col list-item-grid" data-itemid="' +
-                video.id +
-                '" id="video_identifier_' +
-                video.id +
-                '">' +
-                '<span class="item"><div class="thumbnail">' +
-                '<img src="' +
-                video.thumbnail +
-                '" class="img-fluid img-rounded">' +
-                '<span class="datecreated">' +
-                video.datecreated +
-                '</span><span class="duration">' +
-                video.duration +
-                '</span></div><span class="title">' +
-                video.title +
-                '</span><span class="details">' +
-                video.views +
-                ' ' +
-                string[0] +
-                ' <span class="bubble">●</span>' +
-                ' ' +
-                string[1] +
-                ' ' +
-                video.elapsed +
-                '</span></span></div>';
-            self.elements.append(html);
-
-            if (self.selectedIds.indexOf(self.normalizeId(video.id)) > -1) {
-              $('#video_identifier_' + video.id).find('.item').addClass('selected');
-            }
-
-            if (key === videosToShow.length - 1) {
-              self.mergeTitlesFromCache();
-              self.updatePlaylistOrder();
-            }
-
-            return null;
-          }).catch((error) => self.failed(error, self));
-        });
-
-        // Update pagination controls
-        self.updatePagination(totalPages);
-      } else {
-        return str.get_string('noresults', 'mod_stream').
-            then((noresults) => self.elements.html('<div class="alert alert-info">' + noresults + '</div>'));
-      }
+    if (!response || response.status !== 'success') {
+      var message = (response && response.status) ? response.status : 'error';
+      self.elements.html('<div class="alert alert-danger">' + message + '</div>');
+      self.renderVideosFromList(self.selectedVideoCache || []);
+      return false;
     }
+
+    var videos = Array.isArray(response.videos) ? response.videos.slice() : [];
+    self.selectedVideoCache.forEach((video) => {
+      if (!videos.find((v) => self.normalizeId(v.id) === self.normalizeId(video.id))) {
+        videos.push(video);
+      }
+    });
+
+    self.renderVideosFromList(videos);
     return true;
   },
 
@@ -723,79 +735,6 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/notification', 'core/str', 'cor
   },
 
   renderCurrentPage: function() {
-    if (this.allVideos.length === 0) {
-      return;
-    }
-
-    // Re-sort videos to show selected ones first (in case selection changed)
-    this.allVideos.sort((a, b) => {
-      const aSelected = this.selectedIds.indexOf(this.normalizeId(a.id)) > -1;
-      const bSelected = this.selectedIds.indexOf(this.normalizeId(b.id)) > -1;
-
-      if (aSelected && !bSelected) {
-        return -1;
-      }
-      if (!aSelected && bSelected) {
-        return 1;
-      }
-      return 0; // Keep original order for videos with same selection status
-    });
-
-    // Calculate pagination
-    const totalPages = Math.ceil(this.totalVideos / this.itemsPerPage);
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    const videosToShow = this.allVideos.slice(startIndex, endIndex);
-
-    this.elements.html('');
-
-    $.each(videosToShow, (key, video) => {
-      str.get_strings([
-        {key: 'views', component: 'mod_stream'},
-        {key: 'before', component: 'mod_stream'},
-      ]).then((string) => {
-        var html =
-            '<div class="col list-item-grid" data-itemid="' +
-            video.id +
-            '" id="video_identifier_' +
-            video.id +
-            '">' +
-            '<span class="item"><div class="thumbnail">' +
-            '<img src="' +
-            video.thumbnail +
-            '" class="img-fluid img-rounded">' +
-            '<span class="datecreated">' +
-            video.datecreated +
-            '</span><span class="duration">' +
-            video.duration +
-            '</span></div><span class="title">' +
-            video.title +
-            '</span><span class="details">' +
-            video.views +
-            ' ' +
-            string[0] +
-            ' <span class="bubble">●</span>' +
-            ' ' +
-            string[1] +
-            ' ' +
-            video.elapsed +
-            '</span></span></div>';
-        this.elements.append(html);
-
-        if (this.selectedIds.indexOf(this.normalizeId(video.id)) > -1) {
-          $('#video_identifier_' + video.id).find('.item').addClass('selected');
-        }
-
-        if (key === videosToShow.length - 1) {
-          this.mergeTitlesFromCache();
-          this.updatePlaylistOrder();
-        }
-
-        return null;
-      }).catch((error) => this.failed(error, this));
-    });
-
-    // Update pagination controls
-    this.updatePagination(totalPages);
+    this.renderVideosFromList(this.allVideos || []);
   },
 }))

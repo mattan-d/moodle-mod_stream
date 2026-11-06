@@ -112,20 +112,23 @@ class listing extends \external_api {
                 'videos' => new external_multiple_structure(
                         new external_single_structure(
                                 [
-                                        'id' => new external_value(PARAM_TEXT, 'ID of the video.'),
-                                        'title' => new external_value(PARAM_TEXT, 'Title of the video.'),
-                                        'thumbnail' => new external_value(PARAM_TEXT, 'Thumbnail URL of the video.'),
-                                        'size' => new external_value(PARAM_INT, 'Size of the video in bytes.'),
-                                        'date' => new external_value(PARAM_INT, 'Date of the video in Unix timestamp format.'),
-                                        'duration' => new external_value(PARAM_TEXT, 'Duration of the video.'),
-                                        'source' => new external_value(PARAM_TEXT, 'Source URL of the video.'),
-                                        'author' => new external_value(PARAM_INT, 'ID of the author of the video.'),
-                                        'datecreated' => new external_value(PARAM_TEXT,
-                                                'Date the video was created in Unix timestamp format.'),
-                                        'views' => new external_value(PARAM_INT, 'Views of the video.'),
-                                        'elapsed' => new external_value(PARAM_TEXT, 'Video creation time elapsed.'),
+                                        'id' => new external_value(PARAM_RAW, 'ID of the video.'),
+                                        'title' => new external_value(PARAM_RAW, 'Title of the video.', VALUE_DEFAULT, ''),
+                                        'thumbnail' => new external_value(PARAM_RAW, 'Thumbnail URL of the video.', VALUE_DEFAULT, ''),
+                                        'size' => new external_value(PARAM_INT, 'Size of the video in bytes.', VALUE_DEFAULT, 0),
+                                        'date' => new external_value(PARAM_INT, 'Date of the video in Unix timestamp format.', VALUE_DEFAULT, 0),
+                                        'duration' => new external_value(PARAM_RAW, 'Duration of the video.', VALUE_DEFAULT, ''),
+                                        'source' => new external_value(PARAM_RAW, 'Source URL of the video.', VALUE_DEFAULT, ''),
+                                        'author' => new external_value(PARAM_INT, 'ID of the author of the video.', VALUE_DEFAULT, 0),
+                                        'datecreated' => new external_value(PARAM_RAW,
+                                                'Date the video was created in Unix timestamp format.', VALUE_DEFAULT, ''),
+                                        'views' => new external_value(PARAM_INT, 'Views of the video.', VALUE_DEFAULT, 0),
+                                        'elapsed' => new external_value(PARAM_RAW, 'Video creation time elapsed.', VALUE_DEFAULT, ''),
                                 ]
-                        )
+                        ),
+                        'Videos',
+                        VALUE_DEFAULT,
+                        []
                 ),
         ]);
     }
