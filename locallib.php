@@ -40,6 +40,8 @@ class stream_video {
     /**
      * Call for list videos in stream.
      *
+     * Always returns a Moodle external-API safe structure.
+     *
      * @param string $term
      * @param string $sort
      *
@@ -49,13 +51,62 @@ class stream_video {
     public static function listing($term, $sort) {
         global $USER;
 
+        $empty = [
+                'status' => 'error',
+                'videos' => [],
+        ];
+
         $json = self::call([
                 'term' => $term,
                 'email' => $USER->email,
                 'sort' => $sort,
         ]);
 
-        return json_decode($json);
+        if ($json === false || $json === null || $json === '') {
+            return $empty;
+        }
+
+        $decoded = json_decode($json, true);
+        if (!is_array($decoded)) {
+            return $empty;
+        }
+
+        $videos = [];
+        if (!empty($decoded['videos']) && is_array($decoded['videos'])) {
+            foreach ($decoded['videos'] as $video) {
+                if (!is_array($video)) {
+                    continue;
+                }
+                $videos[] = self::normalize_listing_video($video);
+            }
+        }
+
+        return [
+                'status' => !empty($decoded['status']) ? (string) $decoded['status'] : (empty($videos) ? 'error' : 'success'),
+                'videos' => $videos,
+        ];
+    }
+
+    /**
+     * Normalize a Stream API video row for Moodle external return validation.
+     *
+     * @param array $video
+     * @return array
+     */
+    public static function normalize_listing_video(array $video) {
+        return [
+                'id' => isset($video['id']) ? (string) $video['id'] : '',
+                'title' => isset($video['title']) ? (string) $video['title'] : '',
+                'thumbnail' => isset($video['thumbnail']) ? (string) $video['thumbnail'] : '',
+                'size' => isset($video['size']) ? (int) $video['size'] : 0,
+                'date' => isset($video['date']) ? (int) $video['date'] : 0,
+                'duration' => isset($video['duration']) ? (string) $video['duration'] : '',
+                'source' => isset($video['source']) ? (string) $video['source'] : '',
+                'author' => isset($video['author']) ? (int) $video['author'] : 0,
+                'datecreated' => isset($video['datecreated']) ? (string) $video['datecreated'] : '',
+                'views' => isset($video['views']) ? (int) $video['views'] : 0,
+                'elapsed' => isset($video['elapsed']) ? (string) $video['elapsed'] : '',
+        ];
     }
 
     /**

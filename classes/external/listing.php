@@ -78,10 +78,27 @@ class listing extends \external_api {
 
         require_capability('moodle/course:update', $context);
 
-        $helper = new \mod_stream\stream_video();
-        $response = $helper->listing($params['term'], $params['sort']);
+        $response = \mod_stream\stream_video::listing($params['term'], $params['sort']);
 
-        return $response;
+        // Guarantee a structure Moodle can validate (never null / empty string).
+        if (!is_array($response)) {
+            return [
+                'status' => 'error',
+                'videos' => [],
+            ];
+        }
+
+        if (!isset($response['status']) || !is_string($response['status'])) {
+            $response['status'] = empty($response['videos']) ? 'error' : 'success';
+        }
+        if (!isset($response['videos']) || !is_array($response['videos'])) {
+            $response['videos'] = [];
+        }
+
+        return [
+            'status' => $response['status'],
+            'videos' => array_values($response['videos']),
+        ];
     }
 
     /**
