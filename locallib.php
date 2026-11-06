@@ -110,7 +110,32 @@ class stream_video {
     }
 
     /**
+     * Build a minimal video object so the player can still render when metadata is missing.
+     *
+     * @param string $id
+     * @return \stdClass
+     */
+    public static function make_stub_video($id) {
+        $video = new \stdClass();
+        $video->id = (string) $id;
+        $video->title = 'Video ' . $id;
+        $video->thumbnail = '';
+        $video->size = 0;
+        $video->date = 0;
+        $video->duration = '';
+        $video->source = '';
+        $video->author = 0;
+        $video->datecreated = '';
+        $video->views = 0;
+        $video->elapsed = '';
+        return $video;
+    }
+
+    /**
      * Get video details by a list of identifiers.
+     *
+     * Always returns one entry per requested id (API metadata when available,
+     * otherwise a stub) so the activity view can still embed the player.
      *
      * @param array $identifiers
      * @return array
@@ -119,33 +144,46 @@ class stream_video {
     public static function get_videos_by_id(array $identifiers) {
         global $USER;
 
+        $identifiers = array_values(array_filter(array_map(static function($id) {
+            return trim((string) $id);
+        }, $identifiers), static function($id) {
+            return $id !== '' && $id !== 'auto_collection';
+        }));
+
         if (empty($identifiers)) {
             return [];
         }
 
         $json = self::call([
-            'ids' => json_encode($identifiers),
-            'email' => $USER->email
+            'ids' => json_encode(array_values($identifiers)),
+            'email' => $USER->email,
         ]);
         $response = json_decode($json);
 
-        if (isset($response->status) && $response->status === 'success' && !empty($response->videos)) {
-            // Reorder the videos based on the original identifiers array.
-            $videosbyid = [];
+        $videosbyid = [];
+        if (is_object($response) && !empty($response->videos) && is_array($response->videos)) {
             foreach ($response->videos as $video) {
-                $videosbyid[$video->id] = $video;
-            }
-
-            $orderedvideos = [];
-            foreach ($identifiers as $id) {
-                if (isset($videosbyid[$id])) {
-                    $orderedvideos[] = $videosbyid[$id];
+                if (!isset($video->id)) {
+                    continue;
                 }
+                $videosbyid[(string) $video->id] = $video;
             }
-            return $orderedvideos;
         }
 
-        return [];
+        $orderedvideos = [];
+        foreach ($identifiers as $id) {
+            if (isset($videosbyid[$id])) {
+                $video = $videosbyid[$id];
+                $video->id = (string) $video->id;
+                $orderedvideos[] = $video;
+            } else {
+                // Keep the activity playable even if Stream metadata lookup failed
+                // (privacy filters, API outage, older VideoTube, etc.).
+                $orderedvideos[] = self::make_stub_video($id);
+            }
+        }
+
+        return $orderedvideos;
     }
 
     /**
