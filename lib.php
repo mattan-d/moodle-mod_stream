@@ -80,11 +80,12 @@ function stream_add_instance(stdClass $stream, $mform = null) {
         $stream->includeaudio = 1;
     }
     
-    // If collection mode is enabled but no manual selection, set to auto_collection
-    if ($stream->collection_mode && (empty($stream->identifier) || trim($stream->identifier) === '')) {
-        $stream->identifier = 'auto_collection';
+    // identifier is NOT NULL with no DB default. Always write a non-empty value so
+    // NODDOWNLOAD / Teams embeds (no streamid) do not fail the INSERT.
+    if (!isset($stream->identifier) || trim((string) $stream->identifier) === '') {
+        $stream->identifier = !empty($stream->collection_mode) ? 'auto_collection' : 'external';
     }
-    
+
     $stream->id = $DB->insert_record('stream', $stream);
 
     stream_grade_item_update($stream);
@@ -127,9 +128,9 @@ function stream_update_instance(stdClass $stream, $mform = null) {
         $stream->includeaudio = 1;
     }
     
-    // If collection mode is enabled but no manual selection, set to auto_collection
-    if ($stream->collection_mode && (empty($stream->identifier) || trim($stream->identifier) === '')) {
-        $stream->identifier = 'auto_collection';
+    // identifier is NOT NULL with no DB default — never leave empty on update either.
+    if (!isset($stream->identifier) || trim((string) $stream->identifier) === '') {
+        $stream->identifier = !empty($stream->collection_mode) ? 'auto_collection' : 'external';
     }
 
     $result = $DB->update_record('stream', $stream);
