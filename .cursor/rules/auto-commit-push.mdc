@@ -1,0 +1,32 @@
+---
+description: After finishing work, always generate a commit message, commit, and push
+alwaysApply: true
+---
+
+# Auto commit and push
+
+This project requires finishing every agent turn that changed files with a git commit and push.
+
+## When to run
+
+At the end of the response, if this conversation made any file changes (or there are uncommitted changes from this work):
+
+1. Run `git status`, `git diff`, and `git log -5 --oneline` in parallel
+2. Stage relevant files (never stage secrets like `.env`, credentials)
+3. Create a commit with a concise message via HEREDOC (focus on why)
+4. Push to the tracked remote with `git push` (or `git push -u origin HEAD` if needed)
+5. Tell the user the commit hash/message and that it was pushed
+
+## Rules
+
+- This **overrides** the default “only commit when asked” preference for this repo
+- Do not create an empty commit if there is nothing to commit
+- Do not use `--force` push unless the user explicitly asks
+- Do not amend commits that were already pushed
+- Skip only if the user explicitly said not to commit/push in that message
+
+## Commit message style
+
+- 1–2 short sentences
+- Prefer verbs like `fix`, `add`, `update`
+- Example: `Fix Stream video listing UTF-8 decode so the picker returns videos.`
