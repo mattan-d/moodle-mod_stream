@@ -23,6 +23,7 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
+require_once($CFG->libdir . '/filelib.php');
 
 require_login();
 
@@ -43,7 +44,7 @@ $payload = [
         'username' => (string) $user->username,
 ];
 
-$curl = new curl();
+$curl = new \curl();
 $response = $curl->post(
         $endpoint . '/webservice/api/v4',
         $payload,
