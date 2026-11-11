@@ -50,6 +50,8 @@ $response = $curl->post(
         $payload,
         [
                 'CURLOPT_RETURNTRANSFER' => true,
+                'CURLOPT_CONNECTTIMEOUT' => 10,
+                'CURLOPT_TIMEOUT' => 30,
                 'CURLOPT_HTTPHEADER' => [
                         'Authorization: Bearer ' . $accountid,
                         'Accept: application/json',
@@ -58,7 +60,15 @@ $response = $curl->post(
 );
 
 $data = json_decode((string) $response);
-if (empty($data->sesskey)) {
+$info = method_exists($curl, 'get_info') ? $curl->get_info() : [];
+$httpcode = (int) ($info['http_code'] ?? 0);
+
+if (!is_object($data) || empty($data->sesskey)) {
+    debugging(
+            'mod_stream gotorecord SSO failed: http=' . $httpcode .
+            ' raw=' . substr((string) $response, 0, 300),
+            DEBUG_DEVELOPER
+    );
     throw new \moodle_exception('connectionfailed', 'mod_stream');
 }
 
