@@ -95,6 +95,7 @@ $string['stream:view'] = 'View STREAM';
 $string['topic'] = 'Video Topic';
 $string['topic_help'] = 'the video topic from stream server.';
 $string['upload'] = 'Upload';
+$string['personalrecording'] = 'Personal recording';
 $string['viewed'] = 'Viewed';
 $string['views'] = 'Views';
 $string['activityclosed'] = 'This activity closed on {$a}';

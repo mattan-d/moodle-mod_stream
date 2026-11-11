@@ -187,6 +187,7 @@ class mod_stream_mod_form extends moodleform_mod {
                 'endpoint' => get_config('stream', 'apiendpoint'),
                 'token' => get_config('stream', 'accountid'),
                 'email' => $USER->email,
+                'recordurl' => (new moodle_url('/mod/stream/gotorecord.php'))->out(false),
         ]));
         $mform->addElement('html', '</div>');
 

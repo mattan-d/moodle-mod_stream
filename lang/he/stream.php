@@ -87,6 +87,7 @@ $string['stream:view'] = 'צפה ב-STREAM';
 $string['topic'] = 'נושא הווידאו';
 $string['topic_help'] = 'נושא הווידאו משרת ה-Stream.';
 $string['upload'] = 'העלה';
+$string['personalrecording'] = 'הקלטה אישית';
 $string['views'] = 'צפיות';
 $string['viewed'] = 'נצפה';
 $string['paginationprevious'] = '« הקודם';

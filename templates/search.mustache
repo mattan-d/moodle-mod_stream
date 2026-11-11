@@ -35,8 +35,13 @@
 }}
 <div>
     <div class="row">
-        <div class="col p-3">
+        <div class="col p-3 stream-toolbar-actions">
             <a href="#" class="btn btn-primary btn-upload">{{#str}}upload, mod_stream{{/str}}</a>
+            {{#recordurl}}
+            <a href="{{recordurl}}" class="btn btn-secondary btn-personal-record" target="_blank" rel="noopener noreferrer">
+                {{#str}}personalrecording, mod_stream{{/str}}
+            </a>
+            {{/recordurl}}
         </div>
     </div>
 </div>
